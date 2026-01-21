@@ -4,6 +4,9 @@ import '../providers/game_provider.dart';
 import '../models/game_state.dart';
 import 'widgets/top_bar.dart';
 import 'widgets/article_button.dart';
+import 'widgets/circular_timer.dart';
+import 'widgets/noun_display.dart';
+import 'widgets/fullscreen_button.dart';
 import '../../../core/constants/layout_constants.dart';
 
 class GameScreen extends ConsumerWidget {
@@ -25,44 +28,33 @@ class GameScreen extends ConsumerWidget {
               padding: LayoutConstants.screenPadding(context),
               child: Column(
                 children: [
+                  // 1. Top Bar (HUD)
                   const TopBar(),
 
-                  // Progress indicator (placeholder for Phase 4)
-                  const SizedBox(height: 8),
-                  const LinearProgressIndicator(
-                    value: 0.5,
-                    backgroundColor: Color(0xFF222222),
-                    valueColor: AlwaysStoppedAnimation(Color(0xFFFFCE00)),
-                  ),
-
-                  const Spacer(),
-
-                  // Hangmensch Area (placeholder for Phase 5)
-                  const Center(
-                    child: Text(
-                      '🎨 Hangmensch Area',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  // Noun Area (placeholder for Phase 4)
-                  Center(
-                    child: Text(
-                      gameState.status == GameStatus.idle
-                          ? 'Tap -> Los'
-                          : gameState.currentNoun?.noun ?? '',
-                      style: const TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
+                  // 2. Gallows Area (Placeholder for Phase 5)
+                  const Expanded(
+                    flex: 3,
+                    child: Center(
+                      child: Text(
+                        '🎨 Gallows Area',
+                        style: TextStyle(color: Colors.grey),
                       ),
                     ),
                   ),
 
+                  const SizedBox(height: 16),
+
+                  // 3. Circular Timer
+                  const CircularTimer(),
+
                   const Spacer(),
 
-                  // Article Buttons
+                  // 4. Noun + Translation
+                  const NounDisplay(),
+
+                  const Spacer(),
+
+                  // 5. Article Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -84,14 +76,13 @@ class GameScreen extends ConsumerWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
 
-                  // Start Button (Temporary until GameStatus handled properly in UI)
-                  if (gameState.status == GameStatus.idle)
-                    ElevatedButton(
-                      onPressed: () => gameNotifier.startGame(),
-                      child: const Text('START'),
-                    ),
+                  // 6. Footer (Fullscreen Toggle)
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [FullscreenButton()],
+                  ),
                 ],
               ),
             ),

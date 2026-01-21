@@ -19,31 +19,38 @@ import '../models/german_noun.dart';
 /// );
 /// ```
 final nounsProvider = FutureProvider<List<GermanNoun>>((ref) async {
-  final rows = await CsvParser.loadCsv('assets/data/nouns_dev.csv');
+  try {
+    debugPrint('Attempting to load CSV: assets/data/nouns_dev.csv');
+    final rows = await CsvParser.loadCsv('assets/data/nouns_dev.csv');
 
-  debugPrint('CSV loaded with ${rows.length} rows');
-  if (rows.isNotEmpty) {
-    debugPrint('First row: ${rows[0]}');
-    if (rows.length > 1) {
-      debugPrint('Second row: ${rows[1]}');
+    debugPrint('CSV loaded successfully. Row count: ${rows.length}');
+
+    // Skip header row, parse remaining rows into GermanNoun objects
+    final nouns = <GermanNoun>[];
+    for (var i = 1; i < rows.length; i++) {
+      final row = rows[i];
+      if (row.length >= 4) {
+        nouns.add(
+          GermanNoun.fromCsv([
+            row[0].toString(),
+            row[1].toString(),
+            row[2].toString(),
+            row[3].toString(),
+          ]),
+        );
+      }
     }
-  }
 
-  // Skip header row, parse remaining rows into GermanNoun objects
-  final nouns = <GermanNoun>[];
-  for (var i = 1; i < rows.length; i++) {
-    final row = rows[i];
-    if (row.length >= 4) {
-      nouns.add(
-        GermanNoun.fromCsv([
-          row[0].toString(),
-          row[1].toString(),
-          row[2].toString(),
-          row[3].toString(),
-        ]),
-      );
+    if (nouns.isEmpty) {
+      debugPrint('WARNING: No nouns were parsed from CSV!');
+    } else {
+      debugPrint('Parsed ${nouns.length} nouns successfully.');
     }
-  }
 
-  return nouns;
+    return nouns;
+  } catch (e, stack) {
+    debugPrint('ERROR loading nouns: $e');
+    debugPrint('Stack trace: $stack');
+    rethrow;
+  }
 });

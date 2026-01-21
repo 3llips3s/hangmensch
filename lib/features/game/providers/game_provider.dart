@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/game_state.dart';
 import '../models/german_noun.dart';
@@ -11,18 +12,32 @@ class GameNotifier extends StateNotifier<GameState> {
 
   GameNotifier(this._ref) : super(const GameState());
 
-  void startGame() {
-    final nounsAsync = _ref.read(nounsProvider);
-    nounsAsync.whenData((nouns) {
+  void startGame() async {
+    debugPrint('GameNotifier: Starting game...');
+
+    try {
+      final nouns = await _ref.read(nounsProvider.future);
+
+      if (nouns.isEmpty) {
+        debugPrint('GameNotifier: Cannot start, nouns pool is empty!');
+        return;
+      }
+
       final shuffledPool = List<GermanNoun>.from(nouns)..shuffle();
       state = GameState(
         status: GameStatus.playing,
         nounPool: shuffledPool,
         currentNoun: shuffledPool.first,
-        timeRemaining: 6.0, // Default easy time
+        timeRemaining: 6.0,
+      );
+
+      debugPrint(
+        'GameNotifier: Game started with ${shuffledPool.length} nouns.',
       );
       _startTimer();
-    });
+    } catch (e) {
+      debugPrint('GameNotifier: Failed to start game: $e');
+    }
   }
 
   void _startTimer() {

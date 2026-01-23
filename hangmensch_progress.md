@@ -8,16 +8,16 @@ This file tracks implementation progress across 6 phases. Update checkboxes afte
 ## Phase 1: Project Setup & Data Layer
 **Goal:** Set up project structure, dependencies, and CSV data loading
 
-- [ ] Create Flutter project with correct folder structure
-- [ ] Add dependencies to pubspec.yaml (riverpod, shared_preferences, csv)
-- [ ] Add font files (Quicksand, JetBrains Mono) and configure in pubspec.yaml
-- [ ] Create GermanNoun model (`lib/features/game/models/german_noun.dart`)
-- [ ] Implement CSV parser utility (`lib/core/utils/csv_parser.dart`)
-- [ ] Create nouns provider (`lib/features/game/providers/nouns_provider.dart`)
-- [ ] Add CSV file with 3000 nouns to `assets/data/german_nouns.csv`
-- [ ] Verify CSV loads successfully
+- [x] Create Flutter project with correct folder structure
+- [x] Add dependencies to pubspec.yaml (riverpod, shared_preferences, csv)
+- [x] Add font files (Quicksand, JetBrains Mono) and configure in pubspec.yaml
+- [x] Create GermanNoun model (`lib/features/game/models/german_noun.dart`)
+- [x] Implement CSV parser utility (`lib/core/utils/csv_parser.dart`)
+- [x] Create nouns provider (`lib/features/game/providers/nouns_provider.dart`)
+- [x] Add CSV file with 3000 nouns to `assets/data/german_nouns.csv`
+- [x] Verify CSV loads successfully
 
-**Status:** Not started  
+**Status:** Completed  
 **Blockers:** None  
 **Notes:** 
 
@@ -44,21 +44,21 @@ git commit -m "feat: implement Phase 1 - data models and CSV parsing
 ## Phase 2: Core Game Logic
 **Goal:** Implement game state management and business logic
 
-- [ ] Create GameState model (`lib/features/game/models/game_state.dart`)
-- [ ] Add GameStatus enum (idle, countdown, playing, revealed, gameOver)
-- [ ] Add Difficulty enum (easy, medium, hard, infinite)
-- [ ] Add HangmenschPart enum (head, leftArm, rightArm, leftLeg, skirt, rightLeg, eyes)
-- [ ] Implement computed properties (maxTime, mistakeCount)
-- [ ] Create game provider (`lib/features/game/providers/game_provider.dart`)
-- [ ] Implement game state transitions
-- [ ] Implement difficulty progression logic (10→30→60 thresholds)
-- [ ] Implement word pool management (shuffle, remove used, reset after 3000)
-- [ ] Create high score provider (`lib/features/game/providers/high_score_provider.dart`)
-- [ ] Implement SharedPreferences for high score persistence
-- [ ] Implement timer logic with pause/resume
-- [ ] Implement article selection logic (correct/wrong/timeout)
+- [x] Create GameState model (`lib/features/game/models/game_state.dart`)
+- [x] Add GameStatus enum (idle, countdown, playing, revealed, gameOver)
+- [x] Add Difficulty enum (easy, medium, hard, infinite)
+- [x] Add HangmenschPart enum (head, leftArm, rightArm, leftLeg, skirt, rightLeg, eyes)
+- [x] Implement computed properties (maxTime, mistakeCount)
+- [x] Create game provider (`lib/features/game/providers/game_provider.dart`)
+- [x] Implement game state transitions
+- [x] Implement difficulty progression logic (10→30→60 thresholds)
+- [x] Implement word pool management (shuffle, remove used, reset after 3000)
+- [x] Create high score provider (`lib/features/game/providers/high_score_provider.dart`)
+- [x] Implement SharedPreferences for high score persistence
+- [x] Implement timer logic with pause/resume
+- [x] Implement article selection logic (correct/wrong/timeout)
 
-**Status:** Not started  
+**Status:** Completed  
 **Blockers:** Phase 1 must be complete  
 **Notes:**
 
@@ -92,23 +92,23 @@ git commit -m "feat: implement Phase 2 - game logic and state management
 ## Phase 3: UI Foundation
 **Goal:** Build basic UI layout and structure
 
-- [ ] Create GameScreen scaffold (`lib/features/game/game_screen.dart`)
-- [ ] Set background to black
-- [ ] Implement SafeArea and responsive layout (max 600px width)
-- [ ] Create app theme (`lib/core/theme/app_theme.dart`)
-- [ ] Define UI colors (`lib/core/constants/ui_colors.dart`)
-- [ ] Define layout constants (`lib/core/constants/layout_constants.dart`)
-- [ ] Define UI elements (`lib/core/constants/ui_elements.dart`)
-- [ ] Create TopBar widget (`lib/features/game/widgets/top_bar.dart`)
-- [ ] Add high score display (🏆 + number)
-- [ ] Add current score display (📊 + number)
-- [ ] Add lives display (❤️ + number)
-- [ ] Create ArticleButton widget (`lib/features/game/widgets/article_button.dart`)
-- [ ] Add three buttons at bottom (der, die, das)
-- [ ] Implement button press feedback
+- [x] Create GameScreen scaffold (`lib/features/game/game_screen.dart`)
+- [x] Set background to black
+- [x] Implement SafeArea and responsive layout (max 600px width)
+- [x] Create app theme (`lib/core/theme/app_theme.dart`)
+- [x] Define UI colors (`lib/core/constants/ui_colors.dart`)
+- [x] Define layout constants (`lib/core/constants/layout_constants.dart`)
+- [x] Define UI elements (`lib/core/constants/ui_elements.dart`)
+- [x] Create TopBar widget (`lib/features/game/widgets/top_bar.dart`)
+- [x] Add high score display (🏆 + number)
+- [x] Add current score display (📊 + number)
+- [x] Add lives display (❤️ + number)
+- [x] Create ArticleButton widget (`lib/features/game/widgets/article_button.dart`)
+- [x] Add three buttons at bottom (der, die, das)
+- [x] Implement button press feedback
 - [ ] Test responsive layout on different screen sizes
 
-**Status:** Not started  
+**Status:** Completed  
 **Blockers:** Phase 2 must be complete  
 **Notes:**
 
@@ -141,28 +141,28 @@ git commit -m "feat: implement Phase 3 - UI foundation and layout
 ## Phase 4: Custom Painters
 **Goal:** Implement gallows and hangmensch with CustomPaint
 
-- [ ] Create constants file (`lib/core/constants/gallows_specs.dart`)
-- [ ] Define all gallows coordinates (base, pole, bar, rope)
-- [ ] Define all hangmensch coordinates (head, arms, legs, skirt, eyes)
-- [ ] Create GallowsPainter (`lib/features/game/widgets/gallows_painter.dart`)
-- [ ] Implement base drawing method
-- [ ] Implement vertical pole drawing method
-- [ ] Implement horizontal bar drawing method (asymmetric T)
-- [ ] Implement rope drawing method
-- [ ] Add sequential fade-in animation for gallows (idle state)
-- [ ] Create HangmenschPainter (`lib/features/game/widgets/hangmensch_painter.dart`)
-- [ ] Implement head drawing (circle)
-- [ ] Implement left arm drawing (floating)
-- [ ] Implement right arm drawing (floating)
-- [ ] Implement left leg drawing (straight)
-- [ ] Implement skirt drawing (triangle path)
-- [ ] Implement right leg drawing (from skirt)
-- [ ] Implement eyes drawing (X X)
-- [ ] Add trace-in animation for body parts (400ms each)
-- [ ] Implement swing animation for game over
-- [ ] Test all body parts appear at correct mistake count
+- [x] Create constants file (`lib/core/constants/gallows_specs.dart`)
+- [x] Define all gallows coordinates (base, pole, bar, rope)
+- [x] Define all hangmensch coordinates (head, arms, legs, skirt, eyes)
+- [x] Create GallowsPainter (`lib/features/game/widgets/gallows_painter.dart`)
+- [x] Implement base drawing method
+- [x] Implement vertical pole drawing method
+- [x] Implement horizontal bar drawing method (asymmetric T)
+- [x] Implement rope drawing method
+- [x] Add sequential fade-in animation for gallows (idle state)
+- [x] Create HangmenschPainter (`lib/features/game/widgets/hangmensch_painter.dart`)
+- [x] Implement head drawing (circle)
+- [x] Implement left arm drawing (floating)
+- [x] Implement right arm drawing (floating)
+- [x] Implement left leg drawing (straight)
+- [x] Implement skirt drawing (triangle path)
+- [x] Implement right leg drawing (from skirt)
+- [x] Implement eyes drawing (X X)
+- [x] Add trace-in animation for body parts (400ms each)
+- [x] Implement swing animation for game over
+- [x] Test all body parts appear at correct mistake count
 
-**Status:** Not started  
+**Status:** Completed  
 **Blockers:** Phase 3 must be complete  
 **Notes:**
 
@@ -378,8 +378,8 @@ git push origin main --tags
 ---
 
 ## Current Focus
-**Working on:** Not started  
-**Next up:** Phase 1 - Project Setup & Data Layer
+**Working on:** Phase 5 - Game Flow & Animations  
+**Next up:** Phase 6 - Polish & Web Support  
 
 ---
 

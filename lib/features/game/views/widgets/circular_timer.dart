@@ -43,7 +43,7 @@ class CircularTimer extends ConsumerWidget {
           ),
           // Timer Text
           Text(
-            timeRemaining.toStringAsFixed(1),
+            timeRemaining.ceil().toString(),
             style: numberStyle.copyWith(fontSize: 24, color: UIColors.gold),
           ),
         ],

@@ -7,6 +7,7 @@ import 'widgets/article_button.dart';
 import 'widgets/circular_timer.dart';
 import 'widgets/noun_display.dart';
 import 'widgets/fullscreen_button.dart';
+import 'widgets/gallows_view.dart';
 import '../../../core/constants/layout_constants.dart';
 
 class GameScreen extends ConsumerWidget {
@@ -31,15 +32,10 @@ class GameScreen extends ConsumerWidget {
                   // 1. Top Bar (HUD)
                   const TopBar(),
 
-                  // 2. Gallows Area (Placeholder for Phase 5)
-                  const Expanded(
-                    flex: 3,
-                    child: Center(
-                      child: Text(
-                        '🎨 Gallows Area',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
+                  // 2. Gallows Area
+                  Expanded(
+                    flex: 4,
+                    child: Center(child: GallowsView(gameState: gameState)),
                   ),
 
                   const SizedBox(height: 16),

@@ -37,43 +37,54 @@ class NounDisplay extends ConsumerWidget {
         gameState.status == GameStatus.revealed ||
         gameState.status == GameStatus.gameOver;
 
-    Color wordColor = UIColors.white;
-    if (isRevealed) {
-      wordColor = gameState.wasCorrect ? UIColors.correct : UIColors.wrong;
-    }
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Translation (always shown in grey)
-        Text(
-          currentNoun.translation,
-          style: const TextStyle(fontSize: 18, color: UIColors.grey),
-        ),
-        const SizedBox(height: 8),
-        // Noun (with optional article reveal)
+        // Noun Area (with sliding article)
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isRevealed) ...[
-              Text(
-                '${currentNoun.article} ',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: wordColor,
+            // Article with slide-in animation
+            AnimatedSlide(
+              offset: isRevealed ? Offset.zero : const Offset(-0.5, 0),
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutBack,
+              child: AnimatedOpacity(
+                opacity: isRevealed ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Text(
+                  '${currentNoun.article} ',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        gameState.wasCorrect
+                            ? UIColors.correct
+                            : UIColors.wrong,
+                  ),
                 ),
               ),
-            ],
+            ),
+            // Noun
             Text(
               currentNoun.noun,
               style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
-                color: wordColor,
+                // Noun stays Gold as brand color, or turns Red if wrong (following PRD)
+                color:
+                    isRevealed && !gameState.wasCorrect
+                        ? UIColors.wrong
+                        : UIColors.correct,
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        // Translation (now below the noun)
+        Text(
+          currentNoun.translation,
+          style: const TextStyle(fontSize: 18, color: UIColors.grey),
         ),
       ],
     );

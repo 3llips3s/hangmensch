@@ -4,6 +4,7 @@ import '../../providers/game_provider.dart';
 import '../../providers/high_score_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/ui_elements.dart';
+import '../../../../core/constants/ui_colors.dart';
 
 class TopBar extends ConsumerWidget {
   const TopBar({super.key});
@@ -20,18 +21,21 @@ class TopBar extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _StatItem(
-            label: UIElements.highScore,
+            icon: UIElements.highScoreIcon,
             value: highScore.toString(),
+            color: UIColors.gold,
             style: numberStyle,
           ),
           _StatItem(
-            label: UIElements.currentScore,
+            icon: UIElements.currentScoreIcon,
             value: gameState.score.toString(),
+            color: UIColors.grey,
             style: numberStyle,
           ),
           _StatItem(
-            label: UIElements.lives,
+            icon: UIElements.livesIcon,
             value: gameState.lives.toString(),
+            color: UIColors.red,
             style: numberStyle,
           ),
         ],
@@ -41,24 +45,26 @@ class TopBar extends ConsumerWidget {
 }
 
 class _StatItem extends StatelessWidget {
-  final String label;
+  final IconData icon;
   final String value;
+  final Color color;
   final TextStyle style;
 
   const _StatItem({
-    required this.label,
+    required this.icon,
     required this.value,
+    required this.color,
     required this.style,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label, style: const TextStyle(fontSize: 24)),
-        const SizedBox(height: 4),
-        Text(value, style: style.copyWith(fontSize: 18)),
+        Icon(icon, size: 24, color: color),
+        const SizedBox(width: 8),
+        Text(value, style: style.copyWith(fontSize: 24, color: UIColors.white)),
       ],
     );
   }

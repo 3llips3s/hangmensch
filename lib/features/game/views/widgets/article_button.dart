@@ -55,7 +55,7 @@ class _ArticleButtonState extends State<ArticleButton>
           duration: const Duration(milliseconds: 200),
           opacity: widget.isEnabled ? 1.0 : 0.5,
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
             decoration: BoxDecoration(
               border: Border.all(
                 color: UIColors.gold,

@@ -35,6 +35,7 @@ class GameState {
   final GermanNoun? currentNoun;
   final String? revealedArticle; // Shown after answer
   final bool wasCorrect; // For coloring revealed article
+  final String? lastSelectedArticle; // To highlight the user's choice
   final List<GermanNoun> nounPool; // Remaining words
   final List<GermanNoun> usedNouns; // Already shown words
 
@@ -48,6 +49,7 @@ class GameState {
     this.currentNoun,
     this.revealedArticle,
     this.wasCorrect = false,
+    this.lastSelectedArticle,
     this.nounPool = const [],
     this.usedNouns = const [],
   });
@@ -78,6 +80,7 @@ class GameState {
     GermanNoun? currentNoun,
     String? revealedArticle,
     bool? wasCorrect,
+    String? lastSelectedArticle,
     List<GermanNoun>? nounPool,
     List<GermanNoun>? usedNouns,
   }) {
@@ -91,6 +94,7 @@ class GameState {
       currentNoun: currentNoun ?? this.currentNoun,
       revealedArticle: revealedArticle ?? this.revealedArticle,
       wasCorrect: wasCorrect ?? this.wasCorrect,
+      lastSelectedArticle: lastSelectedArticle ?? this.lastSelectedArticle,
       nounPool: nounPool ?? this.nounPool,
       usedNouns: usedNouns ?? this.usedNouns,
     );

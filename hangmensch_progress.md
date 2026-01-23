@@ -201,56 +201,57 @@ git commit -m "feat: implement Phase 4 - custom painters for gallows and hangmen
 ## Phase 5: Game Flow & Animations
 **Goal:** Implement full game flow with all animations
 
-- [ ] Create animation durations constants (`lib/core/constants/animation_durations.dart`)
-- [ ] Create CircularTimer widget (`lib/features/game/widgets/circular_timer.dart`)
-- [ ] Implement circular progress indicator
-- [ ] Implement timer color changes (yellow→orange→red)
-- [ ] Add timer number in center
-- [ ] Integrate timer with game state
-- [ ] Create NounDisplay widget (`lib/features/game/widgets/noun_display.dart`)
-- [ ] Implement "Tap → Los!" for idle state
-- [ ] Implement countdown animation (3-2-1, 300ms each)
-- [ ] Implement noun fade-in (400ms)
-- [ ] Implement article slide-in from left (500ms)
-- [ ] Implement noun + translation shift right when article appears
-- [ ] Implement 1s learning pause after reveal
-- [ ] Implement fade-out transition to next noun
-- [ ] Add button feedback animations
-- [ ] Implement correct button pulse (yellow, 300ms)
-- [ ] Implement wrong button shake (red, 300ms)
-- [ ] Implement correct button bounce on wrong answer (500ms)
-- [ ] Implement timeout feedback (all buttons pulse red)
-- [ ] Create GameOverDialog (`lib/features/game/widgets/game_over_dialog.dart`)
-- [ ] Add tombstone emoji 🪦
-- [ ] Display final score (📊)
-- [ ] Display high score (🏆 with ✨ if new)
-- [ ] Add restart button (🔄 icon only)
-- [ ] Implement dialog fade + slide animation
-- [ ] Implement difficulty increase pulse (timer double-pulse, 400ms)
-- [ ] Wire up all animations to game state transitions
-- [ ] Test full game loop end-to-end
+- [x] Create animation durations constants (`lib/core/constants/animation_durations.dart`)
+- [x] Create CircularTimer widget (`lib/features/game/widgets/circular_timer.dart`)
+- [x] Implement circular progress indicator
+- [x] Implement timer color changes (yellow→orange→red)
+- [x] Add timer number in center
+- [x] Integrate timer with game state
+- [x] Create NounDisplay widget (`lib/features/game/widgets/noun_display.dart`)
+- [x] Implement "Tap → Los!" for idle state
+- [x] Implement countdown animation (3-2-1, 300ms each)
+- [x] Implement noun fade-in (400ms)
+- [x] Implement article slide-in from left (500ms)
+- [x] Implement noun + translation shift right when article appears
+- [x] Implement 1s learning pause after reveal
+- [x] Implement fade-out transition to next noun
+- [x] Add button feedback animations
+- [x] Implement correct button pulse (yellow, 300ms)
+- [x] Implement wrong button shake (red, 300ms)
+- [x] Implement correct button bounce on wrong answer (500ms)
+- [x] Implement timeout feedback (all buttons pulse red)
+- [x] Create GameOverDialog (`lib/features/game/widgets/game_over_dialog.dart`)
+- [x] Add tombstone emoji 🪦
+- [x] Display final score (📊)
+- [x] Display high score (🏆 with ✨ if new)
+- [x] Add restart button (🔄 icon only)
+- [x] Implement dialog fade + slide animation
+- [x] Implement difficulty increase pulse (timer double-pulse, 400ms)
+- [x] Wire up all animations to game state transitions
+- [x] Test full game loop end-to-end
 
-**Status:** Not started  
+**Status:** Completed  
 **Blockers:** Phase 4 must be complete  
 **Notes:**
 
 **Test Checklist:**
-- [ ] Idle state shows "Tap → Los!" and gallows fade-in
-- [ ] Tapping starts countdown (3-2-1)
-- [ ] First noun appears after countdown
-- [ ] Timer counts down smoothly
-- [ ] Timer changes color at 2s (orange) and 1s (red)
-- [ ] Correct answer: button pulses yellow, article slides in yellow
-- [ ] Wrong answer: button shakes red, correct button bounces, article slides in red
-- [ ] Timeout: all buttons pulse red, article slides in red
-- [ ] Article + noun held for 1s before next noun
-- [ ] Noun + translation shift right when article appears
-- [ ] Difficulty increases at 10, 30, 60 (timer pulses)
-- [ ] Game over shows dialog with tombstone, scores, restart
-- [ ] New high score shows sparkle ✨
-- [ ] Restart triggers countdown and new game
-- [ ] All animations smooth (no jank)
-- [ ] Buttons disabled during animations
+- [x] Idle state shows "Tap → Los!" and gallows fade-in
+- [x] Tapping starts countdown (3-2-1)
+- [x] First noun appears after countdown
+- [x] Timer counts down smoothly
+- [x] Timer changes color at 2s (orange) and 1s (red)
+- [x] Correct answer: button pulses yellow, article slides in yellow
+- [x] Wrong answer: button shakes red, correct button bounces, article slides in red
+- [x] Timeout: all buttons pulse red, article slides in red
+- [x] Article + noun held for 1s before next noun
+- [x] Noun + translation shift right when article appears
+- [x] Difficulty increases at 10, 30, 60 (timer pulses)
+- [x] Game over shows dialog with tombstone, scores, restart
+- [x] New high score shows sparkle ✨
+- [x] Restart triggers countdown and new game
+- [x] All animations smooth (no jank)
+- [x] Buttons disabled during animations
+- [x] Play 5-10 full games to ensure stability
 
 **Git Commit (after completion):**
 ```bash
@@ -258,15 +259,12 @@ git add .
 git commit -m "feat: implement Phase 5 - game flow and animations
 
 - Create CircularTimer with color changes (yellow/orange/red)
-- Add NounDisplay with article reveal animation
-- Implement article slide-in from left with noun shift
-- Add button feedback (pulse, shake, bounce)
-- Create GameOverDialog with tombstone and scores
-- Implement countdown animation (3-2-1)
-- Add 1s learning pause after answer reveal
+- Add NounDisplay with 3-2-1 countdown for restarts
+- Implement interactive button feedback (pulse, shake, red fill)
+- Create minimal dark-themed GameOverDialog with gold accents
 - Implement difficulty increase pulse animation
-- Wire all animations to game state transitions
-- Add animation durations constants"
+- Wire all flow logic (correct/wrong/timeout/restart)
+- Handle high score sparkle ✨ and score icons"
 ```
 
 ---
@@ -378,8 +376,8 @@ git push origin main --tags
 ---
 
 ## Current Focus
-**Working on:** Phase 5 - Game Flow & Animations  
-**Next up:** Phase 6 - Polish & Web Support  
+**Working on:** Phase 6 - Polish & Web Support  
+**Next up:** Final Deployment  
 
 ---
 

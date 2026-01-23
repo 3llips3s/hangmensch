@@ -8,6 +8,8 @@ import 'widgets/circular_timer.dart';
 import 'widgets/noun_display.dart';
 import 'widgets/fullscreen_button.dart';
 import 'widgets/gallows_view.dart';
+import 'widgets/game_over_dialog.dart';
+import '../providers/high_score_provider.dart';
 import '../../../core/constants/layout_constants.dart';
 
 class GameScreen extends ConsumerWidget {
@@ -17,6 +19,20 @@ class GameScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gameNotifier = ref.read(gameProvider.notifier);
     final gameState = ref.watch(gameProvider);
+    final highScore = ref.watch(highScoreProvider);
+
+    // Watch for Game Over
+    ref.listen(gameProvider, (previous, next) {
+      if (next.status == GameStatus.gameOver &&
+          previous?.status != GameStatus.gameOver) {
+        showGameOverDialog(
+          context: context,
+          score: next.score,
+          highScore: highScore,
+          isNewHighScore: next.score >= highScore && next.score > 0,
+        );
+      }
+    });
 
     return Scaffold(
       body: SafeArea(

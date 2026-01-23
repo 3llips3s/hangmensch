@@ -13,8 +13,21 @@ class GameNotifier extends StateNotifier<GameState> {
   GameNotifier(this._ref) : super(const GameState());
 
   void startGame() async {
-    debugPrint('GameNotifier: Starting game...');
+    debugPrint('GameNotifier: Starting initial game...');
+    _startInitialGame();
+  }
 
+  void restartGame() async {
+    debugPrint('GameNotifier: Restarting game with countdown...');
+    state = state.copyWith(status: GameStatus.countdown);
+    // 3 seconds countdown handled in UI, then we call _startInitialGame
+  }
+
+  void onCountdownComplete() {
+    _startInitialGame();
+  }
+
+  void _startInitialGame() async {
     try {
       final nouns = await _ref.read(nounsProvider.future);
 
@@ -86,6 +99,7 @@ class GameNotifier extends StateNotifier<GameState> {
       correctAnswers: newCorrectAnswers,
       wasCorrect: isCorrect,
       revealedArticle: state.currentNoun?.article,
+      lastSelectedArticle: selectedArticle,
     );
 
     if (isCorrect) {
@@ -121,12 +135,17 @@ class GameNotifier extends StateNotifier<GameState> {
 
     // Check difficulty progression
     Difficulty newDifficulty = state.difficulty;
+    bool difficultyIncreased = false;
     if (state.correctAnswers >= 60) {
       newDifficulty = Difficulty.infinite;
     } else if (state.correctAnswers >= 30) {
       newDifficulty = Difficulty.hard;
     } else if (state.correctAnswers >= 10) {
       newDifficulty = Difficulty.medium;
+    }
+
+    if (newDifficulty != state.difficulty) {
+      difficultyIncreased = true;
     }
 
     state = state.copyWith(
@@ -136,7 +155,13 @@ class GameNotifier extends StateNotifier<GameState> {
       usedNouns: used,
       difficulty: newDifficulty,
       timeRemaining: _getMaxTime(newDifficulty),
+      // We'll use a listener or a transient flag for the pulse animation
     );
+
+    if (difficultyIncreased) {
+      // Trigger a "difficulty pulse" event here if needed,
+      // or the UI can watch state.difficulty changes.
+    }
 
     _startTimer();
   }

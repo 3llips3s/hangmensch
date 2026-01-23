@@ -11,7 +11,10 @@ class UIColors {
   static const Color darkGrey = Color(0xFF222222);
   static const Color white = Color(0xFFFFFFFF);
 
-  // Status Colors
+  // Timer & Status Colors
   static const Color correct = gold;
   static const Color wrong = red;
+  static const Color timerNormal = gold;
+  static const Color timerWarning = Color(0xFFFF8C00); // Orange
+  static const Color timerCritical = red;
 }

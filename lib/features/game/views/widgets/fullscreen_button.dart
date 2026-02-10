@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:hangmensch/core/utils/web_fullscreen.dart' as web_utils;
 
 class FullscreenButton extends StatelessWidget {
   const FullscreenButton({super.key});
 
   void _toggleFullscreen() {
     if (!kIsWeb) return;
-
-    final element = html.document.documentElement;
-    if (html.document.fullscreenElement == null) {
-      element?.requestFullscreen();
-    } else {
-      html.document.exitFullscreen();
-    }
+    web_utils.toggleFullscreen();
   }
 
   @override

@@ -19,7 +19,12 @@ class GameNotifier extends StateNotifier<GameState> {
 
   void restartGame() async {
     debugPrint('GameNotifier: Restarting game with countdown...');
-    state = state.copyWith(status: GameStatus.countdown);
+    state = state.copyWith(
+      status: GameStatus.countdown,
+      lives: 7, // Clear hangman immediately
+      score: 0, // Reset score immediately
+      timeRemaining: 9.0, // Reset timer for countdown view
+    );
     // 3 seconds countdown handled in UI, then we call _startInitialGame
   }
 
@@ -41,7 +46,7 @@ class GameNotifier extends StateNotifier<GameState> {
         status: GameStatus.playing,
         nounPool: shuffledPool,
         currentNoun: shuffledPool.first,
-        timeRemaining: 6.0,
+        timeRemaining: 9.0, // Easy mode default
       );
 
       debugPrint(
@@ -107,11 +112,14 @@ class GameNotifier extends StateNotifier<GameState> {
     }
 
     if (newLives <= 0) {
-      Future.delayed(const Duration(milliseconds: 1000), () {
+      // 3 second reveal before game over (always incorrect here)
+      Future.delayed(const Duration(milliseconds: 3000), () {
         state = state.copyWith(status: GameStatus.gameOver);
       });
     } else {
-      Future.delayed(const Duration(milliseconds: 1000), () {
+      // Adaptive reveal duration: 1.5s for correct (faster flow), 3s for incorrect (feedback + animation time)
+      final revealDuration = isCorrect ? 1500 : 3000;
+      Future.delayed(Duration(milliseconds: revealDuration), () {
         nextNoun();
       });
     }
@@ -169,11 +177,11 @@ class GameNotifier extends StateNotifier<GameState> {
   double _getMaxTime(Difficulty difficulty) {
     switch (difficulty) {
       case Difficulty.easy:
-        return 6.0;
+        return 9.0;
       case Difficulty.medium:
-        return 4.0;
+        return 6.0;
       case Difficulty.hard:
-        return 2.0;
+        return 3.0;
       case Difficulty.infinite:
         return 1.0;
     }

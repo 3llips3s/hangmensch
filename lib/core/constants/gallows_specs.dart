@@ -1,74 +1,104 @@
 import 'package:flutter/material.dart';
 
 class GallowsDrawingSpecs {
-  static const width = 200.0;
-  static const height = 280.0;
+  static const width = 220.0;
+  static const height = 300.0;
 
   // Stroke widths
-  static const gallowsStrokeWidth = 4.0;
-  static const ropeStrokeWidth = 3.0;
-  static const bodyStrokeWidth = 3.0;
+  static const gallowsStrokeWidth = 6.0;
+  static const ropeStrokeWidth = 2.5;
+  static const bodyStrokeWidth = 3.5;
 
   // === GALLOWS STRUCTURE (Asymmetric T) ===
-
   // Base (horizontal line at bottom, centered)
-  static const baseStart = Offset(50, 260);
-  static const baseEnd = Offset(150, 260);
+  static const baseStart = Offset(10, 275);
+  static const baseEnd = Offset(160, 275);
 
   // Vertical pole (from base upward)
-  static const poleStart = Offset(100, 260);
-  static const poleEnd = Offset(100, 40);
+  static const poleStart = Offset(60, 275);
+  static const poleEnd = Offset(60, 35);
 
-  // Horizontal bar (asymmetric T: small left, long right)
-  static const barStart = Offset(85, 40); // 15px left of pole
-  static const barEnd = Offset(170, 40); // 70px right of pole
+  // Horizontal bar (asymmetric T: extended right for hanging)
+  static const barStart = Offset(30, 35);
+  static const barEnd = Offset(160, 35);
 
-  // Rope (near right end, NOT flush - 10px before end)
-  static const ropeStart = Offset(160, 40);
-  static const ropeEnd = Offset(160, 75);
+  // Rope (positioned for centered figure, further from pole)
+  static const ropeStart = Offset(150, 35);
+  static const ropeEnd = Offset(150, 55); // Gap before head
 
-  // === HANGMENSCH BODY PARTS (Floating limbs, no torso) ===
+  // --- HANGMENSCH BODY PARTS (Floating - gaps between all parts) ---
 
-  // Head (circle at rope end)
-  static const headCenter = Offset(160, 95);
+  // 1. Head (floating with gap from rope)
+  static const headCenter = Offset(150, 85);
   static const headRadius = 18.0;
 
-  // Left arm (from head area, angled down-left, floating)
-  static const leftArmStart = Offset(160, 100);
-  static const leftArmEnd = Offset(145, 120);
+  // 2. Left Arm (diagonal down and outward from head area)
+  static const leftArmStart = Offset(
+    142,
+    120,
+  ); // Gap from head bottom (85 + 18 + 5 gap)
+  static const leftArmEnd = Offset(115, 135); // Angled down-left
 
-  // Right arm (from head area, angled down-right, floating)
-  static const rightArmStart = Offset(160, 100);
-  static const rightArmEnd = Offset(175, 120);
+  // 3. Right Arm (diagonal down and outward from head area)
+  static const rightArmStart = Offset(158, 120); // Gap from head bottom
+  static const rightArmEnd = Offset(185, 135); // Angled down-right
 
-  // Left leg (straight down from head area, floating)
-  static const leftLegStart = Offset(155, 130);
-  static const leftLegEnd = Offset(150, 170);
+  // 4. Left Leg (straight vertical - the "man" leg)
+  static const leftLegStart = Offset(
+    138,
+    145,
+  ); // Gap from arms, same Y as right leg start
+  static const leftLegEnd = Offset(138, 220); // Straight down
 
-  // Skirt (triangle: hip out, then back in - female representation)
-  static const skirtHipCenter = Offset(165, 130);
-  static const skirtOutRight = Offset(180, 150); // OUT to right
-  static const skirtHemRight = Offset(172, 165); // BACK IN (hem right)
-  static const skirtHemLeft = Offset(158, 165); // Hem left side
-  static const skirtOutLeft = Offset(150, 150); // Back to left hip
+  // 5. Skirt (right side - the "woman" element)
+  // Path: Start (top) -> Widen Out (diagonal) -> Hem Straight Across (horizontal) -> close
+  // Starts at same Y as left leg (145), angles out, hems straight back horizontally
+  static const skirtTopStart = Offset(
+    162,
+    145,
+  ); // Same Y as left leg start, mirrored distance from center
+  static const skirtWidePoint = Offset(
+    185,
+    200,
+  ); // Widens out to the right AND down to hem level
+  static const skirtHemIn = Offset(
+    155,
+    200,
+  ); // Straight horizontal hem line back (same Y as widePoint)
 
-  // Right leg (drops from skirt hem)
-  static const rightLegStart = Offset(165, 165);
-  static const rightLegEnd = Offset(165, 205);
+  // 6. Right Leg (straight vertical from inner skirt hem)
+  static const rightLegStart = Offset(
+    162,
+    200,
+  ); // Gap from hem, starts at inner hem point
+  static const rightLegEnd = Offset(162, 220); // Same Y as left leg end
 
-  // X X Eyes (final stage - dead)
-  static const leftEyeX1 = Offset(153, 92);
-  static const leftEyeX2 = Offset(159, 98);
-  static const leftEyeX3 = Offset(159, 92);
-  static const leftEyeX4 = Offset(153, 98);
+  // Eyes (X X) relative to head center
+  static const eyeOffset = 7.0;
+  static const eyeSize = 5.0;
 
-  static const rightEyeX1 = Offset(161, 92);
-  static const rightEyeX2 = Offset(167, 98);
-  static const rightEyeX3 = Offset(167, 92);
-  static const rightEyeX4 = Offset(161, 98);
+  // Drop animation parameters
+  static const dropDistance = 60.0;
+  static const dropDuration = 1200; // milliseconds
 }
 
 class SwingParams {
+  // Legacy - kept for reference, but swing animation is being replaced
   static const horizontalAmplitude = 8.0;
   static const verticalBob = 2.0;
+}
+
+class DropAnimationParams {
+  static const dropDistance = 60.0;
+  static const fadeDuration = Duration(milliseconds: 1200);
+  static const maxHorizontalDrift = 2.5;
+
+  // Staggered delays for each body part (in milliseconds)
+  static const headDelay = 0;
+  static const leftArmDelay = 100;
+  static const rightArmDelay = 150;
+  static const leftLegDelay = 200;
+  static const skirtDelay = 250;
+  static const rightLegDelay = 300;
+  static const eyesDelay = 0; // Same as head
 }

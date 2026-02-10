@@ -15,8 +15,11 @@ class TopBar extends ConsumerWidget {
     final highScore = ref.watch(highScoreProvider);
     final numberStyle = Theme.of(context).numberStyle;
 
+    // Use SafeArea padding at top, minimal bottom padding
+    final topPadding = MediaQuery.of(context).padding.top;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      padding: EdgeInsets.only(top: topPadding + 8, bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -62,9 +65,9 @@ class _StatItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 24, color: color),
-        const SizedBox(width: 8),
-        Text(value, style: style.copyWith(fontSize: 24, color: UIColors.white)),
+        Icon(icon, size: 20, color: color),
+        const SizedBox(width: 12),
+        Text(value, style: style.copyWith(fontSize: 20, color: UIColors.white)),
       ],
     );
   }

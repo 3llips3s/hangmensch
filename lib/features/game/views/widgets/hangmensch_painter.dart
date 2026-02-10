@@ -1,14 +1,14 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/gallows_specs.dart';
 import '../../../../core/constants/ui_colors.dart';
 
 class HangmenschPainter extends CustomPainter {
   final List<double> partOpacities; // List of opacities for each of the 7 parts
-  final double swingValue; // -1.0 to 1.0 for pendulum swing
+  final List<Offset> partOffsets; // Offset for each part during drop animation
 
-  HangmenschPainter({required this.partOpacities, this.swingValue = 0.0})
-    : assert(partOpacities.length == 7);
+  HangmenschPainter({required this.partOpacities, List<Offset>? partOffsets})
+    : partOffsets = partOffsets ?? List.filled(7, Offset.zero),
+      assert(partOpacities.length == 7);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -19,16 +19,11 @@ class HangmenschPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round;
 
-    // Calculate swing offset
-    final offsetX = swingValue * SwingParams.horizontalAmplitude;
-    final offsetY = sin(swingValue.abs() * pi) * SwingParams.verticalBob;
-    final swingOffset = Offset(offsetX, offsetY);
-
     // 1. Head
     if (partOpacities[0] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[0]);
       canvas.drawCircle(
-        GallowsDrawingSpecs.headCenter + swingOffset,
+        GallowsDrawingSpecs.headCenter + partOffsets[0],
         GallowsDrawingSpecs.headRadius,
         paint,
       );
@@ -38,8 +33,8 @@ class HangmenschPainter extends CustomPainter {
     if (partOpacities[1] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[1]);
       canvas.drawLine(
-        GallowsDrawingSpecs.leftArmStart + swingOffset,
-        GallowsDrawingSpecs.leftArmEnd + swingOffset,
+        GallowsDrawingSpecs.leftArmStart + partOffsets[1],
+        GallowsDrawingSpecs.leftArmEnd + partOffsets[1],
         paint,
       );
     }
@@ -48,8 +43,8 @@ class HangmenschPainter extends CustomPainter {
     if (partOpacities[2] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[2]);
       canvas.drawLine(
-        GallowsDrawingSpecs.rightArmStart + swingOffset,
-        GallowsDrawingSpecs.rightArmEnd + swingOffset,
+        GallowsDrawingSpecs.rightArmStart + partOffsets[2],
+        GallowsDrawingSpecs.rightArmEnd + partOffsets[2],
         paint,
       );
     }
@@ -58,38 +53,30 @@ class HangmenschPainter extends CustomPainter {
     if (partOpacities[3] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[3]);
       canvas.drawLine(
-        GallowsDrawingSpecs.leftLegStart + swingOffset,
-        GallowsDrawingSpecs.leftLegEnd + swingOffset,
+        GallowsDrawingSpecs.leftLegStart + partOffsets[3],
+        GallowsDrawingSpecs.leftLegEnd + partOffsets[3],
         paint,
       );
     }
 
-    // 5. Skirt
+    // 5. Skirt (Triangle with apex pointing down)
     if (partOpacities[4] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[4]);
+      final offset = partOffsets[4];
       final path =
           Path()
             ..moveTo(
-              GallowsDrawingSpecs.skirtHipCenter.dx + swingOffset.dx,
-              GallowsDrawingSpecs.skirtHipCenter.dy + swingOffset.dy,
+              GallowsDrawingSpecs.skirtTopStart.dx + offset.dx,
+              GallowsDrawingSpecs.skirtTopStart.dy + offset.dy,
             )
             ..lineTo(
-              GallowsDrawingSpecs.skirtOutRight.dx + swingOffset.dx,
-              GallowsDrawingSpecs.skirtOutRight.dy + swingOffset.dy,
+              GallowsDrawingSpecs.skirtWidePoint.dx + offset.dx,
+              GallowsDrawingSpecs.skirtWidePoint.dy + offset.dy,
             )
             ..lineTo(
-              GallowsDrawingSpecs.skirtHemRight.dx + swingOffset.dx,
-              GallowsDrawingSpecs.skirtHemRight.dy + swingOffset.dy,
-            )
-            ..lineTo(
-              GallowsDrawingSpecs.skirtHemLeft.dx + swingOffset.dx,
-              GallowsDrawingSpecs.skirtHemLeft.dy + swingOffset.dy,
-            )
-            ..lineTo(
-              GallowsDrawingSpecs.skirtOutLeft.dx + swingOffset.dx,
-              GallowsDrawingSpecs.skirtOutLeft.dy + swingOffset.dy,
-            )
-            ..close();
+              GallowsDrawingSpecs.skirtHemIn.dx + offset.dx,
+              GallowsDrawingSpecs.skirtHemIn.dy + offset.dy,
+            );
       canvas.drawPath(path, paint);
     }
 
@@ -97,8 +84,8 @@ class HangmenschPainter extends CustomPainter {
     if (partOpacities[5] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[5]);
       canvas.drawLine(
-        GallowsDrawingSpecs.rightLegStart + swingOffset,
-        GallowsDrawingSpecs.rightLegEnd + swingOffset,
+        GallowsDrawingSpecs.rightLegStart + partOffsets[5],
+        GallowsDrawingSpecs.rightLegEnd + partOffsets[5],
         paint,
       );
     }
@@ -112,27 +99,35 @@ class HangmenschPainter extends CustomPainter {
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round;
 
+      final center = GallowsDrawingSpecs.headCenter + partOffsets[6];
+      final eyeOffset = GallowsDrawingSpecs.eyeOffset;
+      final eyeSize = GallowsDrawingSpecs.eyeSize;
+
       // Left Eye X
+      final lx = center.dx - eyeOffset;
+      final ly = center.dy - 2; // Slightly above center
       canvas.drawLine(
-        GallowsDrawingSpecs.leftEyeX1 + swingOffset,
-        GallowsDrawingSpecs.leftEyeX2 + swingOffset,
+        Offset(lx - eyeSize / 2, ly - eyeSize / 2),
+        Offset(lx + eyeSize / 2, ly + eyeSize / 2),
         eyePaint,
       );
       canvas.drawLine(
-        GallowsDrawingSpecs.leftEyeX3 + swingOffset,
-        GallowsDrawingSpecs.leftEyeX4 + swingOffset,
+        Offset(lx + eyeSize / 2, ly - eyeSize / 2),
+        Offset(lx - eyeSize / 2, ly + eyeSize / 2),
         eyePaint,
       );
 
       // Right Eye X
+      final rx = center.dx + eyeOffset;
+      final ry = center.dy - 2;
       canvas.drawLine(
-        GallowsDrawingSpecs.rightEyeX1 + swingOffset,
-        GallowsDrawingSpecs.rightEyeX2 + swingOffset,
+        Offset(rx - eyeSize / 2, ry - eyeSize / 2),
+        Offset(rx + eyeSize / 2, ry + eyeSize / 2),
         eyePaint,
       );
       canvas.drawLine(
-        GallowsDrawingSpecs.rightEyeX3 + swingOffset,
-        GallowsDrawingSpecs.rightEyeX4 + swingOffset,
+        Offset(rx + eyeSize / 2, ry - eyeSize / 2),
+        Offset(rx - eyeSize / 2, ry + eyeSize / 2),
         eyePaint,
       );
     }
@@ -141,6 +136,6 @@ class HangmenschPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant HangmenschPainter oldDelegate) {
     return oldDelegate.partOpacities != partOpacities ||
-        oldDelegate.swingValue != swingValue;
+        oldDelegate.partOffsets != partOffsets;
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../models/game_state.dart';
 import 'gallows_painter.dart';
@@ -6,8 +7,13 @@ import '../../../../core/constants/gallows_specs.dart';
 
 class GallowsView extends StatefulWidget {
   final GameState gameState;
+  final VoidCallback? onDeathAnimationComplete;
 
-  const GallowsView({super.key, required this.gameState});
+  const GallowsView({
+    super.key,
+    required this.gameState,
+    this.onDeathAnimationComplete,
+  });
 
   @override
   State<GallowsView> createState() => _GallowsViewState();
@@ -15,18 +21,37 @@ class GallowsView extends StatefulWidget {
 
 class _GallowsViewState extends State<GallowsView>
     with TickerProviderStateMixin {
+  // Gallows fade-in controllers
   late AnimationController _fadeController;
   late Animation<double> _baseOpacity;
   late Animation<double> _poleOpacity;
   late Animation<double> _barOpacity;
   late Animation<double> _ropeOpacity;
 
-  late AnimationController _swingController;
-  late Animation<double> _swingAnimation;
-
+  // Body part appearance controllers (for mistakes)
   int _lastMistakeCount = 0;
   final Map<int, AnimationController> _partControllers = {};
   final Map<int, Animation<double>> _partAnimations = {};
+
+  // Drop animation controllers (for death)
+  final Map<int, AnimationController> _dropControllers = {};
+  final Map<int, Animation<double>> _dropAnimations = {};
+  final Map<int, double> _randomDrifts = {};
+  bool _isDropAnimationRunning = false;
+  bool _hasTriggeredDeathAnimation = false;
+
+  // Staggered delays for drop animation (in milliseconds)
+  static const List<int> _dropDelays = [
+    0, // Head (index 0)
+    100, // Left arm (index 1)
+    150, // Right arm (index 2)
+    200, // Left leg (index 3)
+    250, // Skirt (index 4)
+    300, // Right leg (index 5)
+    0, // Eyes (index 6) - same as head
+  ];
+
+  final Random _random = Random();
 
   @override
   void initState() {
@@ -71,24 +96,13 @@ class _GallowsViewState extends State<GallowsView>
       _fadeController.value = 1.0;
     }
 
-    // Swing Animation for Game Over
-    _swingController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _swingAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
-      CurvedAnimation(parent: _swingController, curve: Curves.easeInOut),
-    );
-
-    if (widget.gameState.status == GameStatus.gameOver) {
-      _swingController.repeat(reverse: true);
-    }
-
-    // Initialize part controllers for existing mistakes
+    // Initialize part controllers for body part appearance
     for (int i = 1; i <= 7; i++) {
       _partControllers[i] = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(
+          milliseconds: 1500,
+        ), // Longer, noticeable animation
       );
       _partAnimations[i] = Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(parent: _partControllers[i]!, curve: Curves.easeInOut),
@@ -97,11 +111,85 @@ class _GallowsViewState extends State<GallowsView>
         _partControllers[i]!.value = 1.0;
       }
     }
+
+    // Initialize drop controllers for death animation
+    _initDropControllers();
+
+    // Generate random horizontal drifts for each part
+    for (int i = 0; i < 7; i++) {
+      _randomDrifts[i] =
+          (_random.nextDouble() - 0.5) *
+          2 *
+          DropAnimationParams.maxHorizontalDrift;
+    }
+  }
+
+  void _initDropControllers() {
+    for (int i = 0; i < 7; i++) {
+      _dropControllers[i] = AnimationController(
+        vsync: this,
+        duration: DropAnimationParams.fadeDuration,
+      );
+      _dropAnimations[i] = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _dropControllers[i]!, curve: Curves.easeIn),
+      );
+    }
+  }
+
+  void _startDropAnimation() {
+    if (_isDropAnimationRunning) return;
+    _isDropAnimationRunning = true;
+
+    // Generate new random drifts for this animation
+    for (int i = 0; i < 7; i++) {
+      _randomDrifts[i] =
+          (_random.nextDouble() - 0.5) *
+          2 *
+          DropAnimationParams.maxHorizontalDrift;
+    }
+
+    // Start each part's drop animation with staggered delays
+    for (int i = 0; i < 7; i++) {
+      Future.delayed(Duration(milliseconds: _dropDelays[i]), () {
+        if (mounted) {
+          _dropControllers[i]?.forward();
+        }
+      });
+    }
+
+    // Calculate total animation time and trigger callback when complete
+    final totalDuration =
+        _dropDelays.reduce(max) +
+        DropAnimationParams.fadeDuration.inMilliseconds +
+        300; // 300ms pause after animation
+
+    Future.delayed(Duration(milliseconds: totalDuration), () {
+      if (mounted && widget.onDeathAnimationComplete != null) {
+        widget.onDeathAnimationComplete!();
+      }
+    });
+  }
+
+  void _resetDropAnimation() {
+    _isDropAnimationRunning = false;
+    _hasTriggeredDeathAnimation = false;
+    for (var controller in _dropControllers.values) {
+      controller.reset();
+    }
   }
 
   @override
   void didUpdateWidget(covariant GallowsView oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (widget.gameState.mistakeCount == 0 && _lastMistakeCount > 0) {
+      // Mistake count reset, likely a restart or new game
+      for (var controller in _partControllers.values) {
+        controller.reset();
+      }
+      _resetDropAnimation();
+      _lastMistakeCount = 0;
+    }
 
     if (widget.gameState.status == GameStatus.idle &&
         oldWidget.gameState.status != GameStatus.idle) {
@@ -111,40 +199,68 @@ class _GallowsViewState extends State<GallowsView>
       for (var controller in _partControllers.values) {
         controller.reset();
       }
+      _resetDropAnimation();
       _lastMistakeCount = 0;
     } else if (widget.gameState.status != GameStatus.idle) {
       _fadeController.value = 1.0;
     }
 
     if (widget.gameState.mistakeCount > _lastMistakeCount) {
-      for (
-        int i = _lastMistakeCount + 1;
-        i <= widget.gameState.mistakeCount;
-        i++
-      ) {
-        _partControllers[i]?.forward();
-      }
-      _lastMistakeCount = widget.gameState.mistakeCount;
+      // Capture values for delayed callback
+      final oldCount = _lastMistakeCount;
+      final newCount = widget.gameState.mistakeCount;
+      _lastMistakeCount = newCount; // Update immediately
+
+      // Delay body part animation by 1.2s to let player see feedback first
+      Future.delayed(const Duration(milliseconds: 1200), () {
+        if (!mounted) return;
+        for (int i = oldCount + 1; i <= newCount; i++) {
+          _partControllers[i]?.forward();
+        }
+      });
     }
 
-    if (widget.gameState.status == GameStatus.gameOver) {
-      if (!_swingController.isAnimating) {
-        _swingController.repeat(reverse: true);
-      }
-    } else {
-      _swingController.stop();
-      _swingController.reset();
+    // Trigger drop animation on game over
+    if (widget.gameState.status == GameStatus.gameOver &&
+        !_hasTriggeredDeathAnimation) {
+      _hasTriggeredDeathAnimation = true;
+      // Brief pause after eyes appear (300ms)
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          _startDropAnimation();
+        }
+      });
     }
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
-    _swingController.dispose();
     for (var controller in _partControllers.values) {
       controller.dispose();
     }
+    for (var controller in _dropControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  List<double> _getPartOpacities() {
+    return List.generate(7, (index) {
+      final appearOpacity = _partAnimations[index + 1]?.value ?? 0.0;
+      final dropProgress = _dropAnimations[index]?.value ?? 0.0;
+      // Fade out during drop: opacity = appearOpacity * (1 - dropProgress)
+      return appearOpacity * (1.0 - dropProgress);
+    });
+  }
+
+  List<Offset> _getPartOffsets() {
+    return List.generate(7, (index) {
+      final dropProgress = _dropAnimations[index]?.value ?? 0.0;
+      final dropDistance = DropAnimationParams.dropDistance * dropProgress;
+      final horizontalDrift = (_randomDrifts[index] ?? 0.0) * dropProgress;
+      return Offset(horizontalDrift, dropDistance);
+    });
   }
 
   @override
@@ -152,8 +268,8 @@ class _GallowsViewState extends State<GallowsView>
     return AnimatedBuilder(
       animation: Listenable.merge([
         _fadeController,
-        _swingController,
         ..._partControllers.values,
+        ..._dropControllers.values,
       ]),
       builder: (context, child) {
         return CustomPaint(
@@ -168,14 +284,8 @@ class _GallowsViewState extends State<GallowsView>
             ropeOpacity: _ropeOpacity.value,
           ),
           foregroundPainter: HangmenschPainter(
-            partOpacities: List.generate(
-              7,
-              (index) => _partAnimations[index + 1]?.value ?? 0.0,
-            ),
-            swingValue:
-                widget.gameState.status == GameStatus.gameOver
-                    ? _swingAnimation.value
-                    : 0.0,
+            partOpacities: _getPartOpacities(),
+            partOffsets: _getPartOffsets(),
           ),
         );
       },

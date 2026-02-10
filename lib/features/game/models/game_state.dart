@@ -9,9 +9,9 @@ enum GameStatus {
 }
 
 enum Difficulty {
-  easy, // 6s per noun
-  medium, // 4s per noun
-  hard, // 2s per noun
+  easy, // 9s per noun
+  medium, // 6s per noun
+  hard, // 3s per noun
   infinite, // 1s per noun
 }
 
@@ -45,7 +45,7 @@ class GameState {
     this.lives = 7,
     this.difficulty = Difficulty.easy,
     this.correctAnswers = 0,
-    this.timeRemaining = 6.0,
+    this.timeRemaining = 9.0,
     this.currentNoun,
     this.revealedArticle,
     this.wasCorrect = false,
@@ -58,11 +58,11 @@ class GameState {
   double get maxTime {
     switch (difficulty) {
       case Difficulty.easy:
-        return 6.0;
+        return 9.0;
       case Difficulty.medium:
-        return 4.0;
+        return 6.0;
       case Difficulty.hard:
-        return 2.0;
+        return 3.0;
       case Difficulty.infinite:
         return 1.0;
     }

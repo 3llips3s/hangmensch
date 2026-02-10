@@ -17,6 +17,7 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
   late AnimationController _countdownController;
   late Animation<double> _countdownAnimation;
   int _countdownValue = 3;
+  bool _isCountingDown = false;
 
   @override
   void initState() {
@@ -40,10 +41,10 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
           });
           _countdownController.forward(from: 0.0);
         } else {
-          ref.read(gameProvider.notifier).onCountdownComplete();
           setState(() {
-            _countdownValue = 3; // Reset for next time
+            _isCountingDown = false;
           });
+          ref.read(gameProvider.notifier).onCountdownComplete();
         }
       }
     });
@@ -60,14 +61,17 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
     final gameState = ref.watch(gameProvider);
 
     if (gameState.status == GameStatus.idle) {
+      _countdownValue = 3; // Reset for next time
+      _isCountingDown = false;
       return GestureDetector(
         onTap: () => ref.read(gameProvider.notifier).startGame(),
         child: const Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               UIElements.tapToStart,
               style: TextStyle(
-                fontSize: 48,
+                fontSize: 32, // Smaller than noun (48)
                 fontWeight: FontWeight.bold,
                 color: UIColors.white,
               ),
@@ -78,14 +82,19 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
     }
 
     if (gameState.status == GameStatus.countdown) {
-      if (!_countdownController.isAnimating) {
-        _countdownController.forward(from: 0.0);
+      if (!_isCountingDown) {
+        _isCountingDown = true;
+        _countdownValue = 3;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _countdownController.forward(from: 0.0);
+        });
       }
       return Center(
         child: ScaleTransition(
           scale: _countdownAnimation,
           child: Text(
             '$_countdownValue',
+            key: ValueKey(_countdownValue),
             style: const TextStyle(
               fontSize: 80,
               fontWeight: FontWeight.bold,
@@ -109,26 +118,28 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedSlide(
-              offset: isRevealed ? Offset.zero : const Offset(-0.5, 0),
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutBack,
-              child: AnimatedOpacity(
-                opacity: isRevealed ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: Text(
-                  '${currentNoun.article} ',
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        gameState.wasCorrect
-                            ? UIColors.correct
-                            : UIColors.wrong,
+            // Fix: Only show article when revealed, and use revealedArticle to avoid spoiler flicker
+            if (isRevealed && gameState.revealedArticle != null)
+              AnimatedSlide(
+                offset: isRevealed ? Offset.zero : const Offset(-0.5, 0),
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutBack,
+                child: AnimatedOpacity(
+                  opacity: isRevealed ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Text(
+                    '${gameState.revealedArticle} ',
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color:
+                          gameState.wasCorrect
+                              ? UIColors.correct
+                              : UIColors.wrong,
+                    ),
                   ),
                 ),
               ),
-            ),
             Text(
               currentNoun.noun,
               style: TextStyle(

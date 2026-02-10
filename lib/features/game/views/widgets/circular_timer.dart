@@ -69,21 +69,22 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
           children: [
             // Background track
             const SizedBox(
-              width: 80,
-              height: 80,
+              width: 48,
+              height: 48,
               child: CircularProgressIndicator(
                 value: 1.0,
-                strokeWidth: 8,
+                strokeWidth: 5,
                 color: UIColors.darkGrey,
               ),
             ),
             // Progress bar
             SizedBox(
-              width: 80,
-              height: 80,
+              width: 48,
+              height: 48,
               child: CircularProgressIndicator(
                 value: progress,
-                strokeWidth: 8,
+                strokeWidth: 5,
+                strokeCap: StrokeCap.round,
                 color: timerColor,
                 backgroundColor: Colors.transparent,
               ),
@@ -91,7 +92,7 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
             // Timer Text
             Text(
               timeRemaining.ceil().toString(),
-              style: numberStyle.copyWith(fontSize: 24, color: timerColor),
+              style: numberStyle.copyWith(fontSize: 14, color: timerColor),
             ),
           ],
         ),

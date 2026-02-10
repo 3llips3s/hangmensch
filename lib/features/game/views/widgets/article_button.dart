@@ -139,8 +139,8 @@ class _ArticleButtonState extends ConsumerState<ArticleButton>
                 opacity: widget.isEnabled ? 1.0 : 0.5,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 32,
+                    vertical: 14,
+                    horizontal: 28,
                   ),
                   decoration: BoxDecoration(
                     border: Border.all(

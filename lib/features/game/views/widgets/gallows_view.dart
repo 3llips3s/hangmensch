@@ -1,11 +1,13 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/game_state.dart';
 import 'gallows_painter.dart';
 import 'hangmensch_painter.dart';
 import '../../../../core/constants/gallows_specs.dart';
+import '../../../../core/providers/sound_controller.dart';
 
-class GallowsView extends StatefulWidget {
+class GallowsView extends ConsumerStatefulWidget {
   final GameState gameState;
   final VoidCallback? onDeathAnimationComplete;
 
@@ -16,10 +18,10 @@ class GallowsView extends StatefulWidget {
   });
 
   @override
-  State<GallowsView> createState() => _GallowsViewState();
+  ConsumerState<GallowsView> createState() => _GallowsViewState();
 }
 
-class _GallowsViewState extends State<GallowsView>
+class _GallowsViewState extends ConsumerState<GallowsView>
     with TickerProviderStateMixin {
   // Gallows fade-in controllers
   late AnimationController _fadeController;
@@ -140,6 +142,10 @@ class _GallowsViewState extends State<GallowsView>
     if (_isDropAnimationRunning) return;
     _isDropAnimationRunning = true;
 
+    // PLAY TRAPDOOR SOUND HERE
+    // Syncs exactly with the visual start of the drop
+    ref.read(soundControllerProvider.notifier).playGameOver();
+
     // Generate new random drifts for this animation
     for (int i = 0; i < 7; i++) {
       _randomDrifts[i] =
@@ -214,6 +220,10 @@ class _GallowsViewState extends State<GallowsView>
       // Delay body part animation by 1.2s to let player see feedback first
       Future.delayed(const Duration(milliseconds: 1200), () {
         if (!mounted) return;
+
+        // Play rope/wrong sound exactly when parts start appearing
+        ref.read(soundControllerProvider.notifier).playWrong();
+
         for (int i = oldCount + 1; i <= newCount; i++) {
           _partControllers[i]?.forward();
         }
@@ -224,8 +234,26 @@ class _GallowsViewState extends State<GallowsView>
     if (widget.gameState.status == GameStatus.gameOver &&
         !_hasTriggeredDeathAnimation) {
       _hasTriggeredDeathAnimation = true;
-      // Brief pause after eyes appear (300ms)
-      Future.delayed(const Duration(milliseconds: 300), () {
+
+      // Sequencing Logic:
+      // 1. Mistake 7 happens (in this update or immediately prior).
+      // 2. We wait for:
+      //    a) The 1200ms delay for the body part animation start (from mistakelogic above)
+      //    b) The 1500ms duration of the body part animation (fade in)
+      //    c) A small pause (300-500ms) for dramatic effect
+      // Total delay = 1200 + 1500 + 300 = 3000ms.
+
+      // If we are just restoring state (not a fresh loss), we might want to skip this,
+      // but assuming this is the "kill" moment:
+
+      const int mistakeDelayName = 1200;
+      const int animationDuration = 1500;
+      const int dramaticPause = 100; // Reduced from 500ms for snappier feel
+
+      final totalSequenceDelay =
+          mistakeDelayName + animationDuration + dramaticPause;
+
+      Future.delayed(Duration(milliseconds: totalSequenceDelay), () {
         if (mounted) {
           _startDropAnimation();
         }

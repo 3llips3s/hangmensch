@@ -23,10 +23,7 @@ class GameScreen extends ConsumerStatefulWidget {
 class _GameScreenState extends ConsumerState<GameScreen> {
   bool _dialogShown = false;
 
-  // We'll rely on the provider implementation.
-  // If the provider is auto-disposed, it might stop music.
-  // I defined it as NotifierProvider, which is not auto-disposed by default unless modifier is used.
-  // I should probably stop it.
+  // Provider logic handles sound playback.
 
   void _showDialog() {
     if (_dialogShown) return;
@@ -43,8 +40,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  void _onDeathAnimationComplete() {
-    _showDialog();
+  void _onDeathAnimationComplete() async {
+    // Wait for the trapdoor sound (now 3s long) to play out mostly/fully before showing dialog
+    // The drop animation itself takes some time, but the sound is 3s.
+    // We add a delay to ensure the player hears the "fall" and the silence/thud before UI interruption.
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      _showDialog();
+    }
   }
 
   @override
@@ -64,13 +67,16 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
       // Check for lives decrease (Incorrect Guess)
       if (next.lives < previous.lives) {
-        soundController.playWrong();
+        // Sound is now handled in GallowsView to sync with animation
       }
 
       // Check for Game Over triggers
+      // We do NOT play sound here anymore.
+      // The sound will be triggered by the GallowsView when the drop animation starts.
+      // This allows perfect sync with the visual "trapdoor opening".
       if (next.status == GameStatus.gameOver &&
           previous.status != GameStatus.gameOver) {
-        soundController.playGameOver();
+        // Handled in GallowsView/onDeathAnimationComplete logic or sync
       }
     });
 
@@ -88,7 +94,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               maxWidth: LayoutConstants.maxWidth,
             ),
             child: Padding(
-              padding: LayoutConstants.screenPadding(context),
+              // LayoutConstants.screenPadding includes vertical padding (32.0).
+              // Since we are in SafeArea, this adds to the top.
+              // We want to reduce the top gap.
+              padding: LayoutConstants.screenPadding(context).copyWith(top: 8),
               child: Column(
                 children: [
                   // 1. Top Bar (HUD)
@@ -163,15 +172,32 @@ class _MuteButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isMuted = ref.watch(soundControllerProvider);
-    return IconButton(
-      icon: Icon(
-        isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-        color: Colors.white54,
+    final gameState = ref.watch(gameProvider);
+    final isPlaying = gameState.status == GameStatus.playing;
+
+    return Padding(
+      // Align with the "Das" button (rightmost article button)
+      // Article buttons have some internal spacing, but let's approximate
+      // or match the screen padding if they are flush.
+      // The layout uses mainAxisAlignment.spaceEvenly for articles.
+      // To strictly "flush" right might require visual checking or using the same spacing.
+      // Let's add standard right padding to move it inward.
+      padding: const EdgeInsets.only(right: 16.0),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 300),
+        opacity: isPlaying ? 0.25 : 1.0,
+        child: IconButton(
+          iconSize: 32, // Significantly bigger
+          icon: Icon(
+            isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+            color: Colors.white54,
+          ),
+          onPressed: () {
+            ref.read(soundControllerProvider.notifier).toggleMute();
+          },
+          tooltip: isMuted ? 'Unmute' : 'Mute',
+        ),
       ),
-      onPressed: () {
-        ref.read(soundControllerProvider.notifier).toggleMute();
-      },
-      tooltip: isMuted ? 'Unmute' : 'Mute',
     );
   }
 }

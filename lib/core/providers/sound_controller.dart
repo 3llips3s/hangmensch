@@ -26,11 +26,12 @@ class SoundController extends Notifier<bool> {
     _sfxPlayer.setReleaseMode(ReleaseMode.stop);
 
     // Preload sounds to avoid latency on first play
-    // AudioPlayer's setSourceUrl/setSource doesn't fully "cache" in memory in all versions identically,
-    // but we can play silence or just initialize.
-    // However, specifically for assets, we can use the AudioCache class if available or just rely on OS caching.
-    // In strict audioplayers v6, we can use:
     _preloadSounds();
+
+    // Dispose player when provider is destroyed
+    ref.onDispose(() {
+      _sfxPlayer.dispose();
+    });
 
     // Default: Not muted (false)
     return false;

@@ -104,60 +104,55 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   const TopBar(),
 
                   // 2. Gallows Area
-                  Expanded(
-                    flex: 5,
-                    child: Center(
-                      child: GallowsView(
-                        gameState: gameState,
-                        onDeathAnimationComplete: _onDeathAnimationComplete,
-                      ),
+                  const Spacer(flex: 3),
+                  Center(
+                    child: GallowsView(
+                      gameState: gameState,
+                      onDeathAnimationComplete: _onDeathAnimationComplete,
                     ),
                   ),
-                  // 2b. Spacing
-                  // const SizedBox(height: 8),
+                  const Spacer(flex: 1),
 
                   // 3. Circular Timer
                   const CircularTimer(),
-
-                  const SizedBox(height: 8),
+                  const Spacer(flex: 2),
 
                   // 4. Noun + Translation (centered in remaining space)
-                  const Expanded(flex: 2, child: Center(child: NounDisplay())),
-
-                  const SizedBox(height: 8),
+                  const SizedBox(
+                    height: 100,
+                    child: Center(child: NounDisplay()),
+                  ),
+                  const Spacer(flex: 2),
 
                   // 5. Article Buttons
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: kToolbarHeight * 0.5,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ArticleButton(
-                          article: 'der',
-                          onTap: () => gameNotifier.selectArticle('der'),
-                          isEnabled: gameState.status == GameStatus.playing,
-                        ),
-                        ArticleButton(
-                          article: 'die',
-                          onTap: () => gameNotifier.selectArticle('die'),
-                          isEnabled: gameState.status == GameStatus.playing,
-                        ),
-                        ArticleButton(
-                          article: 'das',
-                          onTap: () => gameNotifier.selectArticle('das'),
-                          isEnabled: gameState.status == GameStatus.playing,
-                        ),
-                      ],
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ArticleButton(
+                        article: 'der',
+                        onTap: () => gameNotifier.selectArticle('der'),
+                        isEnabled: gameState.status == GameStatus.playing,
+                      ),
+                      ArticleButton(
+                        article: 'die',
+                        onTap: () => gameNotifier.selectArticle('die'),
+                        isEnabled: gameState.status == GameStatus.playing,
+                      ),
+                      ArticleButton(
+                        article: 'das',
+                        onTap: () => gameNotifier.selectArticle('das'),
+                        isEnabled: gameState.status == GameStatus.playing,
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: LayoutConstants.spaceSm),
 
                   // 6. Footer (Fullscreen Toggle + Mute Toggle)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [const FullscreenButton(), _MuteButton()],
                   ),
+                  const SizedBox(height: LayoutConstants.spaceSm),
                 ],
               ),
             ),
@@ -182,12 +177,12 @@ class _MuteButton extends ConsumerWidget {
       // The layout uses mainAxisAlignment.spaceEvenly for articles.
       // To strictly "flush" right might require visual checking or using the same spacing.
       // Let's add standard right padding to move it inward.
-      padding: const EdgeInsets.only(right: 16.0),
+      padding: const EdgeInsets.only(right: 4.0),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 300),
         opacity: isPlaying ? 0.25 : 1.0,
         child: IconButton(
-          iconSize: 32, // Significantly bigger
+          iconSize: 26, // Significantly bigger
           icon: Icon(
             isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
             color: Colors.white54,

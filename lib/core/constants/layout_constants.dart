@@ -8,6 +8,11 @@ class LayoutConstants {
   static const double borderRadius = 12.0;
   static const double buttonBorderWidth = 3.0;
 
+  // Spacing scale
+  static const double spaceSm = 8.0;
+  static const double spaceMd = 16.0;
+  static const double spaceLg = 24.0;
+
   static const double topBarHeightCode = 80.0;
 
   static EdgeInsets screenPadding(BuildContext context) {

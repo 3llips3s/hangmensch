@@ -22,10 +22,10 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
   String? _difficultyLabel;
 
   static const _difficultyLabels = {
-    'easy': '⚡ Einfach',
-    'medium': '⚡ Mittel',
-    'hard': '⚡ Schwer',
-    'infinite': '⚡ Endlos',
+    'easy': 'chill',
+    'medium': 'zügig',
+    'hard': 'hektik',
+    'infinite': 'blitz',
   };
 
   @override
@@ -38,9 +38,9 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
       duration: const Duration(milliseconds: 600),
     );
     _pulseAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.6), weight: 40),
-      TweenSequenceItem(tween: Tween(begin: 1.6, end: 0.95), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 0.95, end: 1.0), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.2), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 0.9), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 30),
     ]).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
     );
@@ -58,7 +58,7 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
     // Label: fade in/out for difficulty name
     _labelController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1500),
     );
   }
 
@@ -119,102 +119,115 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
             : _getTimerColor(timeRemaining);
 
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Timer circle with glow + pulse
-          AnimatedBuilder(
-            animation: _glowAnimation,
-            builder: (context, child) {
-              return Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow:
-                      _glowAnimation.value > 0
-                          ? [
-                            BoxShadow(
-                              color: UIColors.gold.withValues(alpha: 0.6),
-                              blurRadius: _glowAnimation.value,
-                              spreadRadius: _glowAnimation.value * 0.15,
-                            ),
-                          ]
-                          : null,
-                ),
-                child: child,
-              );
-            },
-            child: ScaleTransition(
-              scale: _pulseAnimation,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Background track
-                  const SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: CircularProgressIndicator(
-                      value: 1.0,
-                      strokeWidth: 5,
-                      color: UIColors.darkGrey,
+      child: SizedBox(
+        height: 48,
+        width: 48,
+        child: OverflowBox(
+          alignment: Alignment.topCenter,
+          maxHeight:
+              120, // Enough to hold circle (48) + padding (20) + label (20)
+          maxWidth: 200,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Timer circle with glow + pulse
+              AnimatedBuilder(
+                animation: _glowAnimation,
+                builder: (context, child) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow:
+                          _glowAnimation.value > 0
+                              ? [
+                                BoxShadow(
+                                  color: UIColors.gold.withValues(alpha: 0.6),
+                                  blurRadius: _glowAnimation.value,
+                                  spreadRadius: _glowAnimation.value * 0.15,
+                                ),
+                              ]
+                              : null,
                     ),
-                  ),
-                  // Progress bar
-                  SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: CircularProgressIndicator(
-                      value: progress,
-                      strokeWidth: 5,
-                      strokeCap: StrokeCap.round,
-                      color: timerColor,
-                      backgroundColor: Colors.transparent,
-                    ),
-                  ),
-                  // Timer Text
-                  Text(
-                    timeRemaining.ceil().toString(),
-                    style: numberStyle.copyWith(
-                      fontSize: 14,
-                      color: timerColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Difficulty label flash
-          SizedBox(
-            height: 20,
-            child:
-                _difficultyLabel != null
-                    ? FadeTransition(
-                      opacity: TweenSequence<double>([
-                        TweenSequenceItem(
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          weight: 25,
-                        ),
-                        TweenSequenceItem(
-                          tween: Tween(begin: 1.0, end: 1.0),
-                          weight: 50,
-                        ),
-                        TweenSequenceItem(
-                          tween: Tween(begin: 1.0, end: 0.0),
-                          weight: 25,
-                        ),
-                      ]).animate(_labelController),
-                      child: Text(
-                        _difficultyLabel!,
-                        style: numberStyle.copyWith(
-                          fontSize: 11,
-                          color: UIColors.gold,
-                          letterSpacing: 1.2,
+                    child: child,
+                  );
+                },
+                child: ScaleTransition(
+                  scale: _pulseAnimation,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Background track
+                      const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: CircularProgressIndicator(
+                          value: 1.0,
+                          strokeWidth: 5,
+                          color: UIColors.darkGrey,
                         ),
                       ),
-                    )
-                    : const SizedBox.shrink(),
+                      // Progress bar
+                      SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 5,
+                          strokeCap: StrokeCap.round,
+                          color: timerColor,
+                          backgroundColor: Colors.transparent,
+                        ),
+                      ),
+                      // Timer Text
+                      Text(
+                        timeRemaining.ceil().toString(),
+                        style: numberStyle.copyWith(
+                          fontSize: 14,
+                          color: timerColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // difficulty label flash
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(
+                  height: 20,
+                  child:
+                      _difficultyLabel != null
+                          ? FadeTransition(
+                            opacity: TweenSequence<double>([
+                              TweenSequenceItem(
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                weight: 25,
+                              ),
+                              TweenSequenceItem(
+                                tween: Tween(begin: 1.0, end: 1.0),
+                                weight: 50,
+                              ),
+                              TweenSequenceItem(
+                                tween: Tween(begin: 1.0, end: 0.0),
+                                weight: 25,
+                              ),
+                            ]).animate(_labelController),
+                            child: Text(
+                              _difficultyLabel!,
+                              style: numberStyle.copyWith(
+                                fontSize: 11,
+                                color: UIColors.gold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          )
+                          : const SizedBox.shrink(),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

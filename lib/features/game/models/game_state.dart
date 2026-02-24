@@ -1,43 +1,99 @@
 import 'german_noun.dart';
 
+/// Defines the possible states of the game flow.
 enum GameStatus {
-  idle, // Showing "Tap → Los!"
-  countdown, // 3-2-1 countdown after restart
-  playing, // Timer running, waiting for answer
-  revealed, // Article revealed, showing feedback (1s pause)
-  gameOver, // All lives lost, showing dialog
+  /// Indicates the game is idle, awaiting user interaction.
+  idle,
+
+  /// Indicates a countdown is in progress before a new round.
+  countdown,
+
+  /// Indicates the game is active and the timer is running.
+  playing,
+
+  /// Indicates the correct article has been revealed for feedback.
+  revealed,
+
+  /// Indicates the game has ended after all lives are lost.
+  gameOver,
 }
 
+/// Defines the difficulty levels available in the game.
 enum Difficulty {
-  easy, // 9s per noun
-  medium, // 6s per noun
-  hard, // 3s per noun
-  infinite, // 1s per noun
+  /// Easy difficulty with 9 seconds per noun.
+  easy,
+
+  /// Medium difficulty with 6 seconds per noun.
+  medium,
+
+  /// Hard difficulty with 3 seconds per noun.
+  hard,
+
+  /// Infinite difficulty with 1 second per noun.
+  infinite,
 }
 
+/// Defines the body parts of the hangmensch character corresponding to mistakes.
 enum HangmenschPart {
-  head, // Mistake 1
-  leftArm, // Mistake 2
-  rightArm, // Mistake 3
-  leftLeg, // Mistake 4
-  skirt, // Mistake 5
-  rightLeg, // Mistake 6
-  eyes, // Mistake 7 (X X - dead)
+  /// Represents the head, corresponding to the first mistake.
+  head,
+
+  /// Represents the left arm, corresponding to the second mistake.
+  leftArm,
+
+  /// Represents the right arm, corresponding to the third mistake.
+  rightArm,
+
+  /// Represents the left leg, corresponding to the fourth mistake.
+  leftLeg,
+
+  /// Represents the skirt, corresponding to the fifth mistake.
+  skirt,
+
+  /// Represents the right leg, corresponding to the sixth mistake.
+  rightLeg,
+
+  /// Represents the dead eyes, corresponding to the seventh and final mistake.
+  eyes,
 }
 
+/// Represents the immutable state of the game at any given point.
 class GameState {
+  /// The current status of the game flow.
   final GameStatus status;
+
+  /// The player's current total score.
   final int score;
-  final int lives; // 7 to 0
+
+  /// The number of lives remaining (from 7 down to 0).
+  final int lives;
+
+  /// The current game difficulty level.
   final Difficulty difficulty;
-  final int correctAnswers; // Tracks progression through difficulties
-  final double timeRemaining; // Current timer value
+
+  /// The number of consecutive correct answers in the current level.
+  final int correctAnswers;
+
+  /// The time remaining in seconds for the current noun.
+  final double timeRemaining;
+
+  /// The current German noun being displayed.
   final GermanNoun? currentNoun;
-  final String? revealedArticle; // Shown after answer
-  final bool wasCorrect; // For coloring revealed article
-  final String? lastSelectedArticle; // To highlight the user's choice
-  final List<GermanNoun> nounPool; // Remaining words
-  final List<GermanNoun> usedNouns; // Already shown words
+
+  /// The article that was revealed after the user's choice.
+  final String? revealedArticle;
+
+  /// Whether the last user selection was correct.
+  final bool wasCorrect;
+
+  /// The last article selected by the user.
+  final String? lastSelectedArticle;
+
+  /// The pool of remaining nouns to be shown.
+  final List<GermanNoun> nounPool;
+
+  /// The collection of nouns already shown in the current session.
+  final List<GermanNoun> usedNouns;
 
   const GameState({
     this.status = GameStatus.idle,
@@ -54,7 +110,7 @@ class GameState {
     this.usedNouns = const [],
   });
 
-  // Computed properties
+  /// Returns the maximum allowed time based on the current [difficulty].
   double get maxTime {
     switch (difficulty) {
       case Difficulty.easy:
@@ -68,8 +124,10 @@ class GameState {
     }
   }
 
-  int get mistakeCount => 7 - lives; // For hangmensch drawing (0-7)
+  /// Calculates the number of mistakes made based on [lives] remaining.
+  int get mistakeCount => 7 - lives;
 
+  /// Returns a copy of the state with the specified fields replaced.
   GameState copyWith({
     GameStatus? status,
     int? score,

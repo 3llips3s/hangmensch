@@ -4,28 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/csv_parser.dart';
 import '../models/german_noun.dart';
 
-/// Provider that asynchronously loads German nouns from the CSV file.
+/// Provider that asynchronously loads German nouns from a CSV asset.
 ///
-/// Returns a [List<GermanNoun>] containing all nouns from the development
-/// dataset (nouns_dev.csv). The full dataset will be used in production.
-///
-/// Usage:
-/// ```dart
-/// final nouns = ref.watch(nounsProvider);
-/// nouns.when(
-///   data: (list) => Text('Loaded ${list.length} nouns'),
-///   loading: () => CircularProgressIndicator(),
-///   error: (e, s) => Text('Error: $e'),
-/// );
-/// ```
+/// Returns a [List] of [GermanNoun] objects.
 final nounsProvider = FutureProvider<List<GermanNoun>>((ref) async {
   try {
-    debugPrint('Attempting to load CSV: assets/data/nouns_dev.csv');
     final rows = await CsvParser.loadCsv('assets/data/nouns_dev.csv');
 
-    debugPrint('CSV loaded successfully. Row count: ${rows.length}');
-
-    // Skip header row, parse remaining rows into GermanNoun objects
+    /// Skips the header row and parses the remaining rows into [GermanNoun] objects.
     final nouns = <GermanNoun>[];
     for (var i = 1; i < rows.length; i++) {
       final row = rows[i];

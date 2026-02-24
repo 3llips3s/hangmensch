@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/gallows_specs.dart';
 import '../../../../core/constants/ui_colors.dart';
 
+/// Paints the hangmensch character with staggered opacities and offsets for animations.
 class HangmenschPainter extends CustomPainter {
-  final List<double> partOpacities; // List of opacities for each of the 7 parts
-  final List<Offset> partOffsets; // Offset for each part during drop animation
+  /// The collection of opacities for each of the 7 character parts.
+  final List<double> partOpacities;
+
+  /// The collection of offsets for each part during the drop animation.
+  final List<Offset> partOffsets;
 
   HangmenschPainter({required this.partOpacities, List<Offset>? partOffsets})
     : partOffsets = partOffsets ?? List.filled(7, Offset.zero),
@@ -19,7 +23,6 @@ class HangmenschPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round;
 
-    // 1. Head
     if (partOpacities[0] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[0]);
       canvas.drawCircle(
@@ -29,7 +32,6 @@ class HangmenschPainter extends CustomPainter {
       );
     }
 
-    // 2. Left Arm
     if (partOpacities[1] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[1]);
       canvas.drawLine(
@@ -39,7 +41,6 @@ class HangmenschPainter extends CustomPainter {
       );
     }
 
-    // 3. Right Arm
     if (partOpacities[2] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[2]);
       canvas.drawLine(
@@ -49,7 +50,6 @@ class HangmenschPainter extends CustomPainter {
       );
     }
 
-    // 4. Left Leg
     if (partOpacities[3] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[3]);
       canvas.drawLine(
@@ -59,7 +59,7 @@ class HangmenschPainter extends CustomPainter {
       );
     }
 
-    // 5. Skirt (Triangle with apex pointing down)
+    /// Renders the skirt component as a triangular path.
     if (partOpacities[4] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[4]);
       final offset = partOffsets[4];
@@ -80,7 +80,6 @@ class HangmenschPainter extends CustomPainter {
       canvas.drawPath(path, paint);
     }
 
-    // 6. Right Leg
     if (partOpacities[5] > 0) {
       paint.color = UIColors.red.withOpacity(partOpacities[5]);
       canvas.drawLine(
@@ -90,7 +89,7 @@ class HangmenschPainter extends CustomPainter {
       );
     }
 
-    // 7. Eyes (X X)
+    /// Renders cross-shaped eyes to indicate a lost state.
     if (partOpacities[6] > 0) {
       final eyePaint =
           Paint()
@@ -103,9 +102,8 @@ class HangmenschPainter extends CustomPainter {
       final eyeOffset = GallowsDrawingSpecs.eyeOffset;
       final eyeSize = GallowsDrawingSpecs.eyeSize;
 
-      // Left Eye X
       final lx = center.dx - eyeOffset;
-      final ly = center.dy - 2; // Slightly above center
+      final ly = center.dy - 2;
       canvas.drawLine(
         Offset(lx - eyeSize / 2, ly - eyeSize / 2),
         Offset(lx + eyeSize / 2, ly + eyeSize / 2),
@@ -117,7 +115,6 @@ class HangmenschPainter extends CustomPainter {
         eyePaint,
       );
 
-      // Right Eye X
       final rx = center.dx + eyeOffset;
       final ry = center.dy - 2;
       canvas.drawLine(

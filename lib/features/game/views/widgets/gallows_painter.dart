@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/gallows_specs.dart';
 import '../../../../core/constants/ui_colors.dart';
 
+/// Paints the gallows structure with adjustable opacities for different components.
 class GallowsPainter extends CustomPainter {
+  /// The opacity of the gallows base.
   final double baseOpacity;
+
+  /// The opacity of the vertical pole.
   final double poleOpacity;
+
+  /// The opacity of the horizontal bar.
   final double barOpacity;
+
+  /// The opacity of the rope.
   final double ropeOpacity;
 
   GallowsPainter({
@@ -24,7 +32,6 @@ class GallowsPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round;
 
-    // 1. Draw Base
     if (baseOpacity > 0) {
       paint.color = UIColors.gold.withOpacity(baseOpacity);
       canvas.drawLine(
@@ -34,7 +41,6 @@ class GallowsPainter extends CustomPainter {
       );
     }
 
-    // 2. Draw Vertical Pole
     if (poleOpacity > 0) {
       paint.color = UIColors.gold.withOpacity(poleOpacity);
       canvas.drawLine(
@@ -44,7 +50,6 @@ class GallowsPainter extends CustomPainter {
       );
     }
 
-    // 3. Draw Horizontal Bar
     if (barOpacity > 0) {
       paint.color = UIColors.gold.withOpacity(barOpacity);
       canvas.drawLine(
@@ -54,7 +59,6 @@ class GallowsPainter extends CustomPainter {
       );
     }
 
-    // 4. Draw Rope
     if (ropeOpacity > 0) {
       final ropePaint =
           Paint()

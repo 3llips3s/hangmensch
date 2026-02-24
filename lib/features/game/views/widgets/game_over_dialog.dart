@@ -6,9 +6,15 @@ import '../../../../core/constants/ui_colors.dart';
 import '../../../../core/constants/ui_elements.dart';
 import '../../../../core/theme/app_theme.dart';
 
+/// A dialog displayed when the game ends, showing the final score and high score.
 class GameOverDialog extends ConsumerStatefulWidget {
+  /// The score achieved in the session.
   final int score;
+
+  /// The player's persistent high score.
   final int highScore;
+
+  /// Whether the current score represents a new high score.
   final bool isNewHighScore;
 
   const GameOverDialog({
@@ -24,6 +30,7 @@ class GameOverDialog extends ConsumerStatefulWidget {
 
 class _GameOverDialogState extends ConsumerState<GameOverDialog>
     with SingleTickerProviderStateMixin {
+  /// Controller for the entrance slide and fade animation.
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
@@ -37,7 +44,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3), // Start slightly below
+      begin: const Offset(0, 0.3),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
@@ -60,7 +67,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
   @override
   Widget build(BuildContext context) {
     final numberStyle = Theme.of(context).numberStyle;
-    const darkContent = Color(0xFF1A1A1A); // Very dark for contrast on Gold
+    const darkContent = Color(0xFF1A1A1A);
 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
@@ -73,7 +80,6 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
               color: Colors.transparent,
               child: Container(
                 width: 270,
-                height: 360,
                 padding: const EdgeInsets.symmetric(
                   vertical: 32,
                   horizontal: 24,
@@ -92,12 +98,8 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Tombstone Emoji (larger)
-                    const SizedBox(height: 24),
                     const Text('🪦', style: TextStyle(fontSize: 72)),
                     const SizedBox(height: 24),
-
-                    // Current Score (slightly smaller)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -121,8 +123,6 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
                       ],
                     ),
                     const SizedBox(height: 8),
-
-                    // High Score (just trophy + number, no "High" text)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -142,8 +142,6 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
                       ],
                     ),
                     const SizedBox(height: 32),
-
-                    // Restart Button
                     IconButton(
                       onPressed: () {
                         Navigator.of(context).pop();
@@ -166,6 +164,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
   }
 }
 
+/// Helper function to display the [GameOverDialog].
 void showGameOverDialog({
   required BuildContext context,
   required int score,
@@ -175,7 +174,7 @@ void showGameOverDialog({
   showDialog(
     context: context,
     barrierDismissible: false,
-    barrierColor: Colors.black26, // Lighter barrier to show the blur better
+    barrierColor: Colors.black26,
     builder:
         (context) => GameOverDialog(
           score: score,

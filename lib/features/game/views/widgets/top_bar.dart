@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/ui_elements.dart';
 import '../../../../core/constants/ui_colors.dart';
 
+/// A HUD component showing the high score, current score, and remaining lives.
 class TopBar extends ConsumerWidget {
   const TopBar({super.key});
 
@@ -15,7 +16,6 @@ class TopBar extends ConsumerWidget {
     final highScore = ref.watch(highScoreProvider);
     final numberStyle = Theme.of(context).numberStyle;
 
-    // Use SafeArea padding at top, minimal bottom padding
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Padding(
@@ -47,6 +47,7 @@ class TopBar extends ConsumerWidget {
   }
 }
 
+/// A private component for displaying a single numerical statistic with an icon.
 class _StatItem extends StatelessWidget {
   final IconData icon;
   final String value;

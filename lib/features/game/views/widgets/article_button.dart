@@ -6,9 +6,15 @@ import '../../models/game_state.dart';
 import '../../../../core/constants/ui_colors.dart';
 import '../../../../core/constants/layout_constants.dart';
 
+/// An interactive button for selecting a German article ('der', 'die', 'das').
 class ArticleButton extends ConsumerStatefulWidget {
+  /// The German article text displayed on the button.
   final String article;
+
+  /// Callback triggered when the button is tapped.
   final VoidCallback onTap;
+
+  /// Whether the button is currently interactive.
   final bool isEnabled;
 
   const ArticleButton({
@@ -24,12 +30,15 @@ class ArticleButton extends ConsumerStatefulWidget {
 
 class _ArticleButtonState extends ConsumerState<ArticleButton>
     with TickerProviderStateMixin {
+  /// Controller for the tap down/up scale effect.
   late AnimationController _pressController;
   late Animation<double> _scaleAnimation;
 
+  /// Controller for the lateral shake effect on incorrect selection.
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
 
+  /// Controller for the success pulse effect when the article is revealed.
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
@@ -87,7 +96,6 @@ class _ArticleButtonState extends ConsumerState<ArticleButton>
     final isWrongSelection =
         isRevealed && wasThisOneTapped && !isCorrectArticle;
 
-    // Trigger animations based on state
     if (isRevealed && isCorrectArticle) {
       if (!_pulseController.isAnimating) _pulseController.forward(from: 0.0);
     }

@@ -1,18 +1,17 @@
-/// Data model representing a German noun with its article.
-/// 
-/// Used throughout the game to display nouns and check if the user
-/// selected the correct article (der/die/das).
+/// Represents a German noun along with its definite article, plural form, and translation.
+///
+/// Used throughout the game to display nouns and validate user selection of "der", "die", or "das".
 class GermanNoun {
-  /// The definite article: "der", "die", or "das"
+  /// The definite article: "der", "die", or "das".
   final String article;
-  
-  /// The German noun (e.g., "Tisch")
+
+  /// The German noun, such as "Tisch".
   final String noun;
-  
-  /// The plural form (e.g., "Tische") or "kein Pl." if no plural exists
+
+  /// The plural form of the noun or "kein Pl." if no plural exists.
   final String plural;
-  
-  /// The English translation (e.g., "table")
+
+  /// The English translation of the noun.
   final String translation;
 
   GermanNoun({
@@ -22,9 +21,9 @@ class GermanNoun {
     required this.translation,
   });
 
-  /// Factory constructor to create a GermanNoun from a CSV row.
-  /// 
-  /// Expected row format: [article, noun, plural, translation]
+  /// Creates a [GermanNoun] from a CSV [row].
+  ///
+  /// Expected [row] format: `[article, noun, plural, translation]`
   factory GermanNoun.fromCsv(List<String> row) {
     return GermanNoun(
       article: row[0].trim(),

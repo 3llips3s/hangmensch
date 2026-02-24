@@ -4,6 +4,9 @@ import '../../providers/game_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/ui_colors.dart';
 
+/// A widget that displays a circular countdown timer with adaptive colors and animations.
+///
+/// Features a pulsing effect and glow transitions when the difficulty level changes.
 class CircularTimer extends ConsumerStatefulWidget {
   const CircularTimer({super.key});
 
@@ -13,12 +16,18 @@ class CircularTimer extends ConsumerStatefulWidget {
 
 class _CircularTimerState extends ConsumerState<CircularTimer>
     with TickerProviderStateMixin {
+  /// Controller for the scale pulse and elastic bounce effect.
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  /// Controller for the radiating gold shadow glow effect.
   late AnimationController _glowController;
   late Animation<double> _glowAnimation;
+
+  /// Controller for the difficulty label fade-in/out transition.
   late AnimationController _labelController;
 
+  /// The human-readable label for the current difficulty.
   String? _difficultyLabel;
 
   static const _difficultyLabels = {
@@ -32,7 +41,6 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
   void initState() {
     super.initState();
 
-    // Pulse: bigger scale + elastic bounce for difficulty change
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -45,7 +53,6 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
     );
 
-    // Glow: radiating gold shadow
     _glowController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -55,7 +62,6 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
       TweenSequenceItem(tween: Tween(begin: 24.0, end: 0.0), weight: 60),
     ]).animate(CurvedAnimation(parent: _glowController, curve: Curves.easeOut));
 
-    // Label: fade in/out for difficulty name
     _labelController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -70,6 +76,7 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
     super.dispose();
   }
 
+  /// Initiates the feedback animations when the [difficultyName] changes.
   void _triggerDifficultyAnimation(String difficultyName) {
     setState(() {
       _difficultyLabel = _difficultyLabels[difficultyName] ?? difficultyName;
@@ -83,6 +90,7 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
     });
   }
 
+  /// Returns the appropriate color based on the [timeRemaining].
   Color _getTimerColor(double timeRemaining) {
     if (timeRemaining <= 1.0) return UIColors.timerCritical;
     if (timeRemaining <= 2.0) return UIColors.timerWarning;
@@ -96,14 +104,14 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
     final timeRemaining = gameState.timeRemaining;
     final progress = (timeRemaining / maxTime).clamp(0.0, 1.0);
 
-    // Listen for difficulty changes to trigger animation
+    /// Listens for [Difficulty] transitions to trigger animations.
     ref.listen(gameProvider.select((s) => s.difficulty), (previous, next) {
       if (previous != null && next != previous) {
         _triggerDifficultyAnimation(next.name);
       }
     });
 
-    // Listen for game start / restart to show initial difficulty label
+    /// Listens for game initiation to display the initial difficulty label.
     ref.listen(gameProvider.select((s) => s.status), (previous, next) {
       if (next.name == 'playing' &&
           (previous?.name == 'idle' || previous?.name == 'countdown')) {
@@ -124,13 +132,11 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
         width: 48,
         child: OverflowBox(
           alignment: Alignment.topCenter,
-          maxHeight:
-              120, // Enough to hold circle (48) + padding (20) + label (20)
+          maxHeight: 120,
           maxWidth: 200,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Timer circle with glow + pulse
               AnimatedBuilder(
                 animation: _glowAnimation,
                 builder: (context, child) {
@@ -156,7 +162,6 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Background track
                       const SizedBox(
                         width: 48,
                         height: 48,
@@ -166,7 +171,6 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
                           color: UIColors.darkGrey,
                         ),
                       ),
-                      // Progress bar
                       SizedBox(
                         width: 48,
                         height: 48,
@@ -178,7 +182,6 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
                           backgroundColor: Colors.transparent,
                         ),
                       ),
-                      // Timer Text
                       Text(
                         timeRemaining.ceil().toString(),
                         style: numberStyle.copyWith(
@@ -191,7 +194,6 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
                 ),
               ),
 
-              // difficulty label flash
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: SizedBox(

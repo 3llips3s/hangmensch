@@ -7,8 +7,15 @@ import 'hangmensch_painter.dart';
 import '../../../../core/constants/gallows_specs.dart';
 import '../../../../core/providers/sound_controller.dart';
 
+/// A complex widget that manages the visual representation of the gallows and the hangmensch.
+///
+/// Handles multi-stage animations for gallows fading, individual body part appearance,
+/// and the final drop animation during a game over.
 class GallowsView extends ConsumerStatefulWidget {
+  /// The current game state used to drive the visual representation.
   final GameState gameState;
+
+  /// Callback triggered when the death animation (drop) is fully complete.
   final VoidCallback? onDeathAnimationComplete;
 
   const GallowsView({
@@ -23,35 +30,33 @@ class GallowsView extends ConsumerStatefulWidget {
 
 class _GallowsViewState extends ConsumerState<GallowsView>
     with TickerProviderStateMixin {
-  // Gallows fade-in controllers
+  /// Controller for the initial fade-in animation of the gallows structure.
   late AnimationController _fadeController;
   late Animation<double> _baseOpacity;
   late Animation<double> _poleOpacity;
   late Animation<double> _barOpacity;
   late Animation<double> _ropeOpacity;
 
-  // Body part appearance controllers (for mistakes)
+  /// Tracks the last mistake count to trigger staggered part animations.
   int _lastMistakeCount = 0;
+
+  /// Map of controllers for each body part's appearance animation.
   final Map<int, AnimationController> _partControllers = {};
   final Map<int, Animation<double>> _partAnimations = {};
 
-  // Drop animation controllers (for death)
+  /// Map of controllers for the drop (death) animation of each part.
   final Map<int, AnimationController> _dropControllers = {};
   final Map<int, Animation<double>> _dropAnimations = {};
+
+  /// Stores random horizontal drifts for each part during the drop animation.
   final Map<int, double> _randomDrifts = {};
+
+  /// Flags to track the state of the death animation.
   bool _isDropAnimationRunning = false;
   bool _hasTriggeredDeathAnimation = false;
 
-  // Staggered delays for drop animation (in milliseconds)
-  static const List<int> _dropDelays = [
-    0, // Head (index 0)
-    100, // Left arm (index 1)
-    150, // Right arm (index 2)
-    200, // Left leg (index 3)
-    250, // Skirt (index 4)
-    300, // Right leg (index 5)
-    0, // Eyes (index 6) - same as head
-  ];
+  /// Defined staggered delays for the drop animation in milliseconds.
+  static const List<int> _dropDelays = [0, 100, 150, 200, 250, 300, 0];
 
   final Random _random = Random();
 
@@ -60,7 +65,6 @@ class _GallowsViewState extends ConsumerState<GallowsView>
     super.initState();
     _lastMistakeCount = widget.gameState.mistakeCount;
 
-    // Gallows Fade-In Animations
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
@@ -91,20 +95,16 @@ class _GallowsViewState extends ConsumerState<GallowsView>
       ),
     );
 
-    // Initial gallows fade-in if in idle state
     if (widget.gameState.status == GameStatus.idle) {
       _fadeController.forward();
     } else {
       _fadeController.value = 1.0;
     }
 
-    // Initialize part controllers for body part appearance
     for (int i = 1; i <= 7; i++) {
       _partControllers[i] = AnimationController(
         vsync: this,
-        duration: const Duration(
-          milliseconds: 1500,
-        ), // Longer, noticeable animation
+        duration: const Duration(milliseconds: 1500),
       );
       _partAnimations[i] = Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(parent: _partControllers[i]!, curve: Curves.easeInOut),
@@ -114,10 +114,8 @@ class _GallowsViewState extends ConsumerState<GallowsView>
       }
     }
 
-    // Initialize drop controllers for death animation
     _initDropControllers();
 
-    // Generate random horizontal drifts for each part
     for (int i = 0; i < 7; i++) {
       _randomDrifts[i] =
           (_random.nextDouble() - 0.5) *
@@ -126,6 +124,7 @@ class _GallowsViewState extends ConsumerState<GallowsView>
     }
   }
 
+  /// Initializes the controllers for the final death animation.
   void _initDropControllers() {
     for (int i = 0; i < 7; i++) {
       _dropControllers[i] = AnimationController(
@@ -138,15 +137,13 @@ class _GallowsViewState extends ConsumerState<GallowsView>
     }
   }
 
+  /// Initiates the staggered drop animation and plays the associated sound.
   void _startDropAnimation() {
     if (_isDropAnimationRunning) return;
     _isDropAnimationRunning = true;
 
-    // PLAY TRAPDOOR SOUND HERE
-    // Syncs exactly with the visual start of the drop
     ref.read(soundControllerProvider.notifier).playGameOver();
 
-    // Generate new random drifts for this animation
     for (int i = 0; i < 7; i++) {
       _randomDrifts[i] =
           (_random.nextDouble() - 0.5) *
@@ -154,7 +151,6 @@ class _GallowsViewState extends ConsumerState<GallowsView>
           DropAnimationParams.maxHorizontalDrift;
     }
 
-    // Start each part's drop animation with staggered delays
     for (int i = 0; i < 7; i++) {
       Future.delayed(Duration(milliseconds: _dropDelays[i]), () {
         if (mounted) {
@@ -163,11 +159,10 @@ class _GallowsViewState extends ConsumerState<GallowsView>
       });
     }
 
-    // Calculate total animation time and trigger callback when complete
     final totalDuration =
         _dropDelays.reduce(max) +
         DropAnimationParams.fadeDuration.inMilliseconds +
-        300; // 300ms pause after animation
+        300;
 
     Future.delayed(Duration(milliseconds: totalDuration), () {
       if (mounted && widget.onDeathAnimationComplete != null) {
@@ -176,6 +171,7 @@ class _GallowsViewState extends ConsumerState<GallowsView>
     });
   }
 
+  /// Resets the death animation state.
   void _resetDropAnimation() {
     _isDropAnimationRunning = false;
     _hasTriggeredDeathAnimation = false;
@@ -189,7 +185,6 @@ class _GallowsViewState extends ConsumerState<GallowsView>
     super.didUpdateWidget(oldWidget);
 
     if (widget.gameState.mistakeCount == 0 && _lastMistakeCount > 0) {
-      // Mistake count reset, likely a restart or new game
       for (var controller in _partControllers.values) {
         controller.reset();
       }
@@ -201,7 +196,6 @@ class _GallowsViewState extends ConsumerState<GallowsView>
         oldWidget.gameState.status != GameStatus.idle) {
       _fadeController.reset();
       _fadeController.forward();
-      // Reset body parts
       for (var controller in _partControllers.values) {
         controller.reset();
       }
@@ -212,16 +206,14 @@ class _GallowsViewState extends ConsumerState<GallowsView>
     }
 
     if (widget.gameState.mistakeCount > _lastMistakeCount) {
-      // Capture values for delayed callback
       final oldCount = _lastMistakeCount;
       final newCount = widget.gameState.mistakeCount;
-      _lastMistakeCount = newCount; // Update immediately
+      _lastMistakeCount = newCount;
 
-      // Delay body part animation by 1.2s to let player see feedback first
+      /// Delays body part animation to allow the player to view feedback first.
       Future.delayed(const Duration(milliseconds: 1200), () {
         if (!mounted) return;
 
-        // Play rope/wrong sound exactly when parts start appearing
         ref.read(soundControllerProvider.notifier).playWrong();
 
         for (int i = oldCount + 1; i <= newCount; i++) {
@@ -230,34 +222,13 @@ class _GallowsViewState extends ConsumerState<GallowsView>
       });
     }
 
-    // Trigger drop animation on game over
     if (widget.gameState.status == GameStatus.gameOver &&
         !_hasTriggeredDeathAnimation) {
       _hasTriggeredDeathAnimation = true;
 
-      // Sequencing Logic:
-      // 1. Mistake 7 happens (in this update or immediately prior).
-      // 2. We wait for:
-      //    a) The 1200ms delay for the body part animation start (from mistakelogic above)
-      //    b) The 1500ms duration of the body part animation (fade in)
-      //    c) A small pause (300-500ms) for dramatic effect
-      // Total delay = 1200 + 1500 + 300 = 3000ms.
-
-      // If we are just restoring state (not a fresh loss), we might want to skip this,
-      // but assuming this is the "kill" moment:
-
-      const int mistakeDelayName = 1200;
-      const int animationDuration = 1500;
-      const int dramaticPause = 100; // Reduced from 500ms for snappier feel
-
-      final totalSequenceDelay =
-          mistakeDelayName + animationDuration + dramaticPause;
-
-      Future.delayed(Duration(milliseconds: totalSequenceDelay), () {
-        if (mounted) {
-          _startDropAnimation();
-        }
-      });
+      if (mounted) {
+        _startDropAnimation();
+      }
     }
   }
 
@@ -273,15 +244,16 @@ class _GallowsViewState extends ConsumerState<GallowsView>
     super.dispose();
   }
 
+  /// Calculates the current opacity for each character part during animations.
   List<double> _getPartOpacities() {
     return List.generate(7, (index) {
       final appearOpacity = _partAnimations[index + 1]?.value ?? 0.0;
       final dropProgress = _dropAnimations[index]?.value ?? 0.0;
-      // Fade out during drop: opacity = appearOpacity * (1 - dropProgress)
       return appearOpacity * (1.0 - dropProgress);
     });
   }
 
+  /// Calculates the current visual offset for each part during the drop animation.
   List<Offset> _getPartOffsets() {
     return List.generate(7, (index) {
       final dropProgress = _dropAnimations[index]?.value ?? 0.0;

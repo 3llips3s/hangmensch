@@ -13,6 +13,7 @@ import 'widgets/game_over_dialog.dart';
 import '../providers/high_score_provider.dart';
 import '../../../core/constants/layout_constants.dart';
 
+/// Represents the primary game screen where the core gameplay loop occurs.
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
 
@@ -23,8 +24,7 @@ class GameScreen extends ConsumerStatefulWidget {
 class _GameScreenState extends ConsumerState<GameScreen> {
   bool _dialogShown = false;
 
-  // Provider logic handles sound playback.
-
+  /// Displays the game over dialog with final [score] and [highScore].
   void _showDialog() {
     if (_dialogShown) return;
     _dialogShown = true;
@@ -40,10 +40,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
+  /// Handles the completion of the death animation by triggering the game over dialog.
   void _onDeathAnimationComplete() async {
-    // Wait for the trapdoor sound (now 3s long) to play out mostly/fully before showing dialog
-    // The drop animation itself takes some time, but the sound is 3s.
-    // We add a delay to ensure the player hears the "fall" and the silence/thud before UI interruption.
+    /// Wait for the audio and visual cues to conclude before showing the dialog.
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       _showDialog();
@@ -55,55 +54,33 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final gameNotifier = ref.read(gameProvider.notifier);
     final gameState = ref.watch(gameProvider);
 
-    // Listen for game events to play sounds
+    /// Listens for game state transitions to trigger sound effects.
     ref.listen(gameProvider, (previous, next) {
       if (previous == null) return;
       final soundController = ref.read(soundControllerProvider.notifier);
 
-      // Check for score increase (Correct Guess)
       if (next.score > previous.score) {
         soundController.playCorrect();
       }
-
-      // Check for lives decrease (Incorrect Guess)
-      if (next.lives < previous.lives) {
-        // Sound is now handled in GallowsView to sync with animation
-      }
-
-      // Check for Game Over triggers
-      // We do NOT play sound here anymore.
-      // The sound will be triggered by the GallowsView when the drop animation starts.
-      // This allows perfect sync with the visual "trapdoor opening".
-      if (next.status == GameStatus.gameOver &&
-          previous.status != GameStatus.gameOver) {
-        // Handled in GallowsView/onDeathAnimationComplete logic or sync
-      }
     });
 
-    // Reset dialog flag when game restarts
     if (gameState.status != GameStatus.gameOver) {
       _dialogShown = false;
     }
 
     return Scaffold(
       body: SafeArea(
-        top: false, // Allow content to extend to very top
+        top: false,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               maxWidth: LayoutConstants.maxWidth,
             ),
             child: Padding(
-              // LayoutConstants.screenPadding includes vertical padding (32.0).
-              // Since we are in SafeArea, this adds to the top.
-              // We want to reduce the top gap.
               padding: LayoutConstants.screenPadding(context).copyWith(top: 8),
               child: Column(
                 children: [
-                  // 1. Top Bar (HUD)
                   const TopBar(),
-
-                  // 2. Gallows Area
                   const Spacer(flex: 3),
                   Center(
                     child: GallowsView(
@@ -112,19 +89,13 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     ),
                   ),
                   const Spacer(flex: 1),
-
-                  // 3. Circular Timer
                   const CircularTimer(),
                   const Spacer(flex: 2),
-
-                  // 4. Noun + Translation (centered in remaining space)
                   const SizedBox(
                     height: 100,
                     child: Center(child: NounDisplay()),
                   ),
                   const Spacer(flex: 2),
-
-                  // 5. Article Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -145,9 +116,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: LayoutConstants.spaceSm),
-
-                  // 6. Footer (Fullscreen Toggle + Mute Toggle)
+                  const Spacer(flex: 1),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [const FullscreenButton(), _MuteButton()],
@@ -163,6 +132,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   }
 }
 
+/// A private component for toggling the game's mute state.
 class _MuteButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -171,18 +141,12 @@ class _MuteButton extends ConsumerWidget {
     final isPlaying = gameState.status == GameStatus.playing;
 
     return Padding(
-      // Align with the "Das" button (rightmost article button)
-      // Article buttons have some internal spacing, but let's approximate
-      // or match the screen padding if they are flush.
-      // The layout uses mainAxisAlignment.spaceEvenly for articles.
-      // To strictly "flush" right might require visual checking or using the same spacing.
-      // Let's add standard right padding to move it inward.
       padding: const EdgeInsets.only(right: 4.0),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 300),
         opacity: isPlaying ? 0.25 : 1.0,
         child: IconButton(
-          iconSize: 26, // Significantly bigger
+          iconSize: 26,
           icon: Icon(
             isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
             color: Colors.white54,

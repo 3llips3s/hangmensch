@@ -2,18 +2,12 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Manages sound effect playback and mute state for the application.
 class SoundController extends Notifier<bool> {
-  // Use separate players for different sound types to allow overlap if needed,
-  // or use a single one to prevent cacophony.
-  // Given "tied to specific function", let's use a single player for game events
-  // to ensure they are distinct and don't overlap messily, OR distinct players
-  // if we want correct guess (bubble) to not be cut off by something else immediately?
-  // User asked to avoid "race conditions".
-  // A single player ensures sequential playback (new sound cuts old).
-  // This is usually desired for UI/gameplay feedback unless it's background + SFX.
+  /// The audio player used for sound effects.
   late AudioPlayer _sfxPlayer;
 
-  // Asset Paths
+  /// Defines relative asset paths for audio files.
   static const String correctSound = 'audio/bubble.mp3';
   static const String wrongSound = 'audio/rope.mp3';
   static const String gameOverSound = 'audio/trapdoor.mp3';
@@ -22,23 +16,21 @@ class SoundController extends Notifier<bool> {
   bool build() {
     _sfxPlayer = AudioPlayer();
 
-    // Set release mode to stop to save resources
+    /// Sets the release mode to stop to optimize resource utilization.
     _sfxPlayer.setReleaseMode(ReleaseMode.stop);
 
-    // Preload sounds to avoid latency on first play
     _preloadSounds();
 
-    // Dispose player when provider is destroyed
+    /// Disposes the [_sfxPlayer] when the provider is destroyed.
     ref.onDispose(() {
       _sfxPlayer.dispose();
     });
 
-    // Default: Not muted (false)
     return false;
   }
 
+  /// Preloads audio assets into the cache to ensure low latency during playback.
   Future<void> _preloadSounds() async {
-    // Preload sounds to ensure low latency
     try {
       await _sfxPlayer.audioCache.loadAll([
         correctSound,
@@ -46,11 +38,11 @@ class SoundController extends Notifier<bool> {
         gameOverSound,
       ]);
     } catch (e) {
-      // Handle or log error
       debugPrint('Error preloading sounds: $e');
     }
   }
 
+  /// Toggles the mute state and adjusts volume accordingly.
   Future<void> toggleMute() async {
     state = !state;
     if (state) {
@@ -60,6 +52,7 @@ class SoundController extends Notifier<bool> {
     }
   }
 
+  /// Plays the [correctSound] effect if not muted.
   Future<void> playCorrect() async {
     if (state) return;
     try {
@@ -68,10 +61,11 @@ class SoundController extends Notifier<bool> {
       }
       await _sfxPlayer.play(AssetSource(correctSound));
     } catch (e) {
-      // Handle potential errors silently or log
+      // Errors are handled silently for playback stability
     }
   }
 
+  /// Plays the [wrongSound] effect if not muted.
   Future<void> playWrong() async {
     if (state) return;
     try {
@@ -80,10 +74,11 @@ class SoundController extends Notifier<bool> {
       }
       await _sfxPlayer.play(AssetSource(wrongSound));
     } catch (e) {
-      // Handle errors
+      // Errors are handled silently for playback stability
     }
   }
 
+  /// Plays the [gameOverSound] effect if not muted.
   Future<void> playGameOver() async {
     if (state) return;
     try {
@@ -92,11 +87,12 @@ class SoundController extends Notifier<bool> {
       }
       await _sfxPlayer.play(AssetSource(gameOverSound));
     } catch (e) {
-      // Handle errors
+      // Errors are handled silently for playback stability
     }
   }
 }
 
+/// Provider that exposes the [SoundController].
 final soundControllerProvider = NotifierProvider<SoundController, bool>(
   () => SoundController(),
 );

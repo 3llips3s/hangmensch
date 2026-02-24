@@ -5,6 +5,7 @@ import '../../models/game_state.dart';
 import '../../../../core/constants/ui_colors.dart';
 import '../../../../core/constants/ui_elements.dart';
 
+/// A widget that manages the display of the current noun, translation, and countdown.
 class NounDisplay extends ConsumerStatefulWidget {
   const NounDisplay({super.key});
 
@@ -14,9 +15,14 @@ class NounDisplay extends ConsumerStatefulWidget {
 
 class _NounDisplayState extends ConsumerState<NounDisplay>
     with TickerProviderStateMixin {
+  /// Controller for the countdown scale transition.
   late AnimationController _countdownController;
   late Animation<double> _countdownAnimation;
+
+  /// The current value shown during the initiation countdown.
   int _countdownValue = 3;
+
+  /// Whether the countdown sequence is currently active.
   bool _isCountingDown = false;
 
   @override
@@ -61,7 +67,7 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
     final gameState = ref.watch(gameProvider);
 
     if (gameState.status == GameStatus.idle) {
-      _countdownValue = 3; // Reset for next time
+      _countdownValue = 3;
       _isCountingDown = false;
       return GestureDetector(
         onTap: () => ref.read(gameProvider.notifier).startGame(),
@@ -71,7 +77,7 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
             Text(
               UIElements.tapToStart,
               style: TextStyle(
-                fontSize: 32, // Smaller than noun (48)
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
                 color: UIColors.white,
               ),
@@ -115,45 +121,47 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Fix: Only show article when revealed, and use revealedArticle to avoid spoiler flicker
-            if (isRevealed && gameState.revealedArticle != null)
-              AnimatedSlide(
-                offset: isRevealed ? Offset.zero : const Offset(-0.5, 0),
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOutBack,
-                child: AnimatedOpacity(
-                  opacity: isRevealed ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 300),
-                  child: Text(
-                    '${gameState.revealedArticle} ',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          gameState.wasCorrect
-                              ? UIColors.correct
-                              : UIColors.wrong,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isRevealed && gameState.revealedArticle != null)
+                AnimatedSlide(
+                  offset: isRevealed ? Offset.zero : const Offset(-0.5, 0),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedOpacity(
+                    opacity: isRevealed ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: Text(
+                      '${gameState.revealedArticle} ',
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color:
+                            gameState.wasCorrect
+                                ? UIColors.correct
+                                : UIColors.wrong,
+                      ),
                     ),
                   ),
                 ),
+              Text(
+                currentNoun.noun,
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color:
+                      isRevealed && !gameState.wasCorrect
+                          ? UIColors.wrong
+                          : UIColors.correct,
+                ),
               ),
-            Text(
-              currentNoun.noun,
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color:
-                    isRevealed && !gameState.wasCorrect
-                        ? UIColors.wrong
-                        : UIColors.correct,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Text(
           currentNoun.translation,
           style: const TextStyle(fontSize: 18, color: UIColors.grey),

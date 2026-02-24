@@ -6,32 +6,34 @@ import '../models/german_noun.dart';
 import 'nouns_provider.dart';
 import 'high_score_provider.dart';
 
+/// Notifier that manages the core game logic, including score, lives, and timer states.
 class GameNotifier extends StateNotifier<GameState> {
   final Ref _ref;
   Timer? _timer;
 
   GameNotifier(this._ref) : super(const GameState());
 
+  /// Starts the initial game session.
   void startGame() async {
-    debugPrint('GameNotifier: Starting initial game...');
     _startInitialGame();
   }
 
+  /// Restarts the game by initiating a countdown and resetting core metrics.
   void restartGame() async {
-    debugPrint('GameNotifier: Restarting game with countdown...');
     state = state.copyWith(
       status: GameStatus.countdown,
-      lives: 7, // Clear hangman immediately
-      score: 0, // Reset score immediately
-      timeRemaining: 9.0, // Reset timer for countdown view
+      lives: 7,
+      score: 0,
+      timeRemaining: 9.0,
     );
-    // 3 seconds countdown handled in UI, then we call _startInitialGame
   }
 
+  /// Handles the transition after the UI countdown is complete.
   void onCountdownComplete() {
     _startInitialGame();
   }
 
+  /// Initializes the game state with a fresh pool of nouns and starts the timer.
   void _startInitialGame() async {
     try {
       final nouns = await _ref.read(nounsProvider.future);
@@ -46,18 +48,16 @@ class GameNotifier extends StateNotifier<GameState> {
         status: GameStatus.playing,
         nounPool: shuffledPool,
         currentNoun: shuffledPool.first,
-        timeRemaining: 9.0, // Easy mode default
+        timeRemaining: 9.0,
       );
 
-      debugPrint(
-        'GameNotifier: Game started with ${shuffledPool.length} nouns.',
-      );
       _startTimer();
     } catch (e) {
       debugPrint('GameNotifier: Failed to start game: $e');
     }
   }
 
+  /// Starts or resumes the periodic timer for the current round.
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
@@ -75,17 +75,20 @@ class GameNotifier extends StateNotifier<GameState> {
     });
   }
 
+  /// Handles the expiration of the timer for the current noun.
   void _handleTimeout() {
     _timer?.cancel();
     _processAnswer(null);
   }
 
+  /// Registers the [article] selected by the user and progresses the game.
   void selectArticle(String article) {
     if (state.status != GameStatus.playing) return;
     _timer?.cancel();
     _processAnswer(article);
   }
 
+  /// Processes the [selectedArticle], updates score/lives, and schedules the next round.
   void _processAnswer(String? selectedArticle) {
     final isCorrect =
         selectedArticle != null &&
@@ -112,12 +115,12 @@ class GameNotifier extends StateNotifier<GameState> {
     }
 
     if (newLives <= 0) {
-      // 3 second reveal before game over (always incorrect here)
+      /// Shows feedback for 3 seconds before transitioning to game over.
       Future.delayed(const Duration(milliseconds: 3000), () {
         state = state.copyWith(status: GameStatus.gameOver);
       });
     } else {
-      // Adaptive reveal duration: 1.5s for correct (faster flow), 3s for incorrect (feedback + animation time)
+      /// Uses adaptive reveal duration: 1.5s for correct, 3s for incorrect feedback.
       final revealDuration = isCorrect ? 1500 : 3000;
       Future.delayed(Duration(milliseconds: revealDuration), () {
         nextNoun();
@@ -125,6 +128,7 @@ class GameNotifier extends StateNotifier<GameState> {
     }
   }
 
+  /// Progresses the game to the [nextNoun], updating the pool and difficulty as needed.
   void nextNoun() {
     if (state.lives <= 0) return;
 
@@ -141,19 +145,14 @@ class GameNotifier extends StateNotifier<GameState> {
       used = [];
     }
 
-    // Check difficulty progression
+    /// Evaluates difficulty progression based on [correctAnswers].
     Difficulty newDifficulty = state.difficulty;
-    bool difficultyIncreased = false;
     if (state.correctAnswers >= 60) {
       newDifficulty = Difficulty.infinite;
     } else if (state.correctAnswers >= 30) {
       newDifficulty = Difficulty.hard;
     } else if (state.correctAnswers >= 10) {
       newDifficulty = Difficulty.medium;
-    }
-
-    if (newDifficulty != state.difficulty) {
-      difficultyIncreased = true;
     }
 
     state = state.copyWith(
@@ -163,17 +162,12 @@ class GameNotifier extends StateNotifier<GameState> {
       usedNouns: used,
       difficulty: newDifficulty,
       timeRemaining: _getMaxTime(newDifficulty),
-      // We'll use a listener or a transient flag for the pulse animation
     );
-
-    if (difficultyIncreased) {
-      // Trigger a "difficulty pulse" event here if needed,
-      // or the UI can watch state.difficulty changes.
-    }
 
     _startTimer();
   }
 
+  /// Returns the maximum duration allowed for the given [difficulty].
   double _getMaxTime(Difficulty difficulty) {
     switch (difficulty) {
       case Difficulty.easy:

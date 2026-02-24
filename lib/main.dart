@@ -7,10 +7,11 @@ import 'core/theme/app_theme.dart';
 import 'features/game/providers/high_score_provider.dart';
 import 'features/game/views/game_screen.dart';
 
+/// Main entry point for the Hangmensch application.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Enable Immersive sticky mode as requested by user
+  /// Enables immersive sticky mode for a better full-screen mobile experience.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   final prefs = await SharedPreferences.getInstance();
@@ -23,6 +24,7 @@ void main() async {
   );
 }
 
+/// The root widget of the application, configuring the global theme and home screen.
 class HangmenschApp extends StatelessWidget {
   const HangmenschApp({super.key});
 

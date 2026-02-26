@@ -9,7 +9,7 @@ import '../models/german_noun.dart';
 /// Returns a [List] of [GermanNoun] objects.
 final nounsProvider = FutureProvider<List<GermanNoun>>((ref) async {
   try {
-    final rows = await CsvParser.loadCsv('assets/data/nouns_dev.csv');
+    final rows = await CsvParser.loadCsv('assets/data/german_nouns.csv');
 
     /// Skips the header row and parses the remaining rows into [GermanNoun] objects.
     final nouns = <GermanNoun>[];

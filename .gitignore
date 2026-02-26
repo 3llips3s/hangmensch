@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/local.properties
+/android/app/key.properties
+**/*.jks
+**/*.keystore
+.env*
+
+# Internal Project Documentation
+hangmensch_prd.md
+hangmensch_progress.md
+hangmensch_setup_guide.md
+.antigravityrules
+.antigravityignore
+brain/

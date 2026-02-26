@@ -1,16 +1,30 @@
-# hangmensch
+# Hangmensch
 
-A new Flutter project.
+A professional German article learning game based on hangman mechanics. Designed to help learners master "der", "die", and "das" through engaging gameplay.
 
-## Getting Started
+## About the Project
+Hangmensch (a play on "Hangman" and the German word for "human") is a gamified learning tool. Players guess German nouns and their corresponding articles. Incorrect guesses progressively build a hangman, while correct guesses reveal the word.
 
-This project is a starting point for a Flutter application.
+## Tech Stack
+- **Framework**: Flutter (Dart)
+- **State Management**: Riverpod
+- **Audio**: Audioplayers
+- **Data**: CSV-based German noun database
+- **Deployment**: GitHub Pages (Web) & GitHub Releases (Android APK)
 
-A few resources to get you started if this is your first Flutter project:
+## How to Play (Web)
+1. Open the [Web App](https://gichia.github.io/hangmensch/).
+2. Select a difficulty level (Easy, Medium, Hard, or Infinite).
+3. Guess the article (Der/Die/Das) and the characters of the German noun.
+4. Try to reveal the word before the hangman is complete!
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Installation (Android)
+1. Download the latest `app-release.apk` from the [Releases](https://github.com/gichia/hangmensch/releases) page.
+2. Open the APK on your Android device.
+3. If prompted, allow "Installation from Unknown Sources".
+4. Install and enjoy!
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## License
+Distributed under the MIT License. See `LICENSE` for more information.
+
+Developed by **Gichia**.

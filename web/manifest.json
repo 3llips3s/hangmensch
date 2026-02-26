@@ -1,11 +1,11 @@
 {
-    "name": "hangmensch",
-    "short_name": "hangmensch",
+    "name": "Hangmensch",
+    "short_name": "Hangmensch",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "description": "A professional German article learning game based on hangman mechanics",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

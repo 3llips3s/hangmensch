@@ -14,9 +14,8 @@ Hangmensch (a play on "Hangman" and the German word for "human") is a gamified l
 
 ## How to Play (Web)
 1. Open the [Web App](https://gichia.github.io/hangmensch/).
-2. Select a difficulty level (Easy, Medium, Hard, or Infinite).
-3. Guess the article (Der/Die/Das) and the characters of the German noun.
-4. Try to reveal the word before the hangman is complete!
+2. Guess the article (Der/Die/Das) and the characters of the German noun.
+3. Try to reveal the word before the hangman is complete!
 
 ## Installation (Android)
 1. Download the latest `app-release.apk` from the [Releases](https://github.com/gichia/hangmensch/releases) page.
@@ -27,4 +26,4 @@ Hangmensch (a play on "Hangman" and the German word for "human") is a gamified l
 ## License
 Distributed under the MIT License. See `LICENSE` for more information.
 
-Developed by **Gichia**.
+Developed by **3llips3s**.

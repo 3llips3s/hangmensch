@@ -13,6 +13,7 @@ import 'widgets/gallows_view.dart';
 import 'widgets/game_over_dialog.dart';
 import '../providers/high_score_provider.dart';
 import '../../../core/constants/layout_constants.dart';
+import '../../../../core/utils/web_fullscreen.dart' as web_utils;
 
 /// Represents the primary game screen where the core gameplay loop occurs.
 class GameScreen extends ConsumerStatefulWidget {
@@ -69,6 +70,12 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       _dialogShown = false;
     }
 
+    // isCompact is true when running on web and NOT in fullscreen mode.
+    // On native platforms kIsWeb is false, so isCompact is always false there.
+    // When the user enters fullscreen, the canvas resize triggers a rebuild,
+    // which re-evaluates isFullscreenActive and clears the compact flag.
+    final isCompact = kIsWeb && !web_utils.isFullscreenActive;
+
     return Scaffold(
       body: SafeArea(
         top: false,
@@ -78,69 +85,59 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             constraints: const BoxConstraints(
               maxWidth: LayoutConstants.maxWidth,
             ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isShortScreen = constraints.maxHeight < 620;
-                final isVeryShortScreen = constraints.maxHeight < 540;
-
-                return Padding(
-                  padding: LayoutConstants.screenPadding(context).copyWith(
-                    top: 8,
-                    bottom:
-                        (kIsWeb && isShortScreen)
-                            ? 16
-                            : LayoutConstants.verticalPadding,
+            child: Padding(
+              padding: LayoutConstants.screenPadding(context).copyWith(
+                top: 8,
+                bottom: isCompact ? 8 : LayoutConstants.verticalPadding,
+              ),
+              child: Column(
+                children: [
+                  const TopBar(),
+                  const Spacer(flex: 3),
+                  Center(
+                    child: GallowsView(
+                      gameState: gameState,
+                      onDeathAnimationComplete: _onDeathAnimationComplete,
+                    ),
                   ),
-                  child: Column(
+                  const Spacer(flex: 1),
+                  CircularTimer(isCompact: isCompact),
+                  const Spacer(flex: 2),
+                  SizedBox(
+                    height: isCompact ? 80 : 100,
+                    child: Center(child: NounDisplay(isCompact: isCompact)),
+                  ),
+                  const Spacer(flex: 2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      const TopBar(),
-                      Spacer(flex: isShortScreen ? 1 : 3),
-                      Center(
-                        child: GallowsView(
-                          gameState: gameState,
-                          onDeathAnimationComplete: _onDeathAnimationComplete,
-                        ),
+                      ArticleButton(
+                        article: 'der',
+                        onTap: () => gameNotifier.selectArticle('der'),
+                        isEnabled: gameState.status == GameStatus.playing,
                       ),
-                      Spacer(flex: isShortScreen ? 1 : 1),
-                      const CircularTimer(),
-                      Spacer(flex: isShortScreen ? 1 : 2),
-                      SizedBox(
-                        height: isVeryShortScreen ? 70 : 100,
-                        child: const Center(child: NounDisplay()),
+                      ArticleButton(
+                        article: 'die',
+                        onTap: () => gameNotifier.selectArticle('die'),
+                        isEnabled: gameState.status == GameStatus.playing,
                       ),
-                      Spacer(flex: isShortScreen ? 1 : 2),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ArticleButton(
-                            article: 'der',
-                            onTap: () => gameNotifier.selectArticle('der'),
-                            isEnabled: gameState.status == GameStatus.playing,
-                          ),
-                          ArticleButton(
-                            article: 'die',
-                            onTap: () => gameNotifier.selectArticle('die'),
-                            isEnabled: gameState.status == GameStatus.playing,
-                          ),
-                          ArticleButton(
-                            article: 'das',
-                            onTap: () => gameNotifier.selectArticle('das'),
-                            isEnabled: gameState.status == GameStatus.playing,
-                          ),
-                        ],
+                      ArticleButton(
+                        article: 'das',
+                        onTap: () => gameNotifier.selectArticle('das'),
+                        isEnabled: gameState.status == GameStatus.playing,
                       ),
-                      if (!isShortScreen) const Spacer(flex: 1),
-                      if (isShortScreen) const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [const FullscreenButton(), _MuteButton()],
-                      ),
-                      if (!isShortScreen)
-                        const SizedBox(height: LayoutConstants.spaceSm),
                     ],
                   ),
-                );
-              },
+                  if (isCompact) const SizedBox(height: 20),
+                  if (!isCompact) const Spacer(flex: 1),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [const FullscreenButton(), _MuteButton()],
+                  ),
+                  if (!isCompact)
+                    const SizedBox(height: LayoutConstants.spaceSm),
+                ],
+              ),
             ),
           ),
         ),

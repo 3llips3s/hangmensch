@@ -3,6 +3,9 @@ import 'dart:html' as html;
 /// Whether the current browser environment supports the Fullscreen API.
 bool get isFullscreenSupported => html.document.fullscreenEnabled ?? false;
 
+/// Whether the browser is currently in fullscreen mode.
+bool get isFullscreenActive => html.document.fullscreenElement != null;
+
 /// Toggles the browser's fullscreen mode for the root document element.
 void toggleFullscreen() {
   final element = html.document.documentElement;

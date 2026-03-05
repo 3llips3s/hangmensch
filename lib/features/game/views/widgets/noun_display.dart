@@ -7,7 +7,10 @@ import '../../../../core/constants/ui_elements.dart';
 
 /// A widget that manages the display of the current noun, translation, and countdown.
 class NounDisplay extends ConsumerStatefulWidget {
-  const NounDisplay({super.key});
+  /// Whether the surrounding layout is compact (e.g. non-fullscreen mobile browser).
+  final bool isCompact;
+
+  const NounDisplay({super.key, this.isCompact = false});
 
   @override
   ConsumerState<NounDisplay> createState() => _NounDisplayState();
@@ -118,66 +121,60 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
         gameState.status == GameStatus.revealed ||
         gameState.status == GameStatus.gameOver;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenHeight = MediaQuery.of(context).size.height;
-        final isVeryShortScreen = screenHeight < 540;
-        final fontSize = isVeryShortScreen ? 40.0 : 48.0;
+    final fontSize = widget.isCompact ? 40.0 : 48.0;
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (isRevealed && gameState.revealedArticle != null)
-                    AnimatedSlide(
-                      offset: isRevealed ? Offset.zero : const Offset(-0.5, 0),
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeOutBack,
-                      child: AnimatedOpacity(
-                        opacity: isRevealed ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 300),
-                        child: Text(
-                          '${gameState.revealedArticle} ',
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                gameState.wasCorrect
-                                    ? UIColors.correct
-                                    : UIColors.wrong,
-                          ),
-                        ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isRevealed && gameState.revealedArticle != null)
+                AnimatedSlide(
+                  offset: isRevealed ? Offset.zero : const Offset(-0.5, 0),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedOpacity(
+                    opacity: isRevealed ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: Text(
+                      '${gameState.revealedArticle} ',
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.bold,
+                        color:
+                            gameState.wasCorrect
+                                ? UIColors.correct
+                                : UIColors.wrong,
                       ),
                     ),
-                  Text(
-                    currentNoun.noun,
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          isRevealed && !gameState.wasCorrect
-                              ? UIColors.wrong
-                              : UIColors.correct,
-                    ),
                   ),
-                ],
+                ),
+              Text(
+                currentNoun.noun,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color:
+                      isRevealed && !gameState.wasCorrect
+                          ? UIColors.wrong
+                          : UIColors.correct,
+                ),
               ),
-            ),
-            SizedBox(height: isVeryShortScreen ? 2 : 4),
-            Text(
-              currentNoun.translation,
-              style: TextStyle(
-                fontSize: isVeryShortScreen ? 14 : 18,
-                color: UIColors.grey,
-              ),
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+        SizedBox(height: widget.isCompact ? 2 : 4),
+        Text(
+          currentNoun.translation,
+          style: TextStyle(
+            fontSize: widget.isCompact ? 14 : 18,
+            color: UIColors.grey,
+          ),
+        ),
+      ],
     );
   }
 }

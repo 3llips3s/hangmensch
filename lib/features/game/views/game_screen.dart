@@ -78,54 +78,69 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             constraints: const BoxConstraints(
               maxWidth: LayoutConstants.maxWidth,
             ),
-            child: Padding(
-              padding: LayoutConstants.screenPadding(context).copyWith(top: 8),
-              child: Column(
-                children: [
-                  const TopBar(),
-                  const Spacer(flex: 3),
-                  Center(
-                    child: GallowsView(
-                      gameState: gameState,
-                      onDeathAnimationComplete: _onDeathAnimationComplete,
-                    ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isShortScreen = constraints.maxHeight < 620;
+                final isVeryShortScreen = constraints.maxHeight < 540;
+
+                return Padding(
+                  padding: LayoutConstants.screenPadding(context).copyWith(
+                    top: 8,
+                    bottom:
+                        (kIsWeb && isShortScreen)
+                            ? 16
+                            : LayoutConstants.verticalPadding,
                   ),
-                  const Spacer(flex: 1),
-                  const CircularTimer(),
-                  const Spacer(flex: 2),
-                  const SizedBox(
-                    height: 100,
-                    child: Center(child: NounDisplay()),
-                  ),
-                  const Spacer(flex: 2),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  child: Column(
                     children: [
-                      ArticleButton(
-                        article: 'der',
-                        onTap: () => gameNotifier.selectArticle('der'),
-                        isEnabled: gameState.status == GameStatus.playing,
+                      const TopBar(),
+                      Spacer(flex: isShortScreen ? 1 : 3),
+                      Center(
+                        child: GallowsView(
+                          gameState: gameState,
+                          onDeathAnimationComplete: _onDeathAnimationComplete,
+                        ),
                       ),
-                      ArticleButton(
-                        article: 'die',
-                        onTap: () => gameNotifier.selectArticle('die'),
-                        isEnabled: gameState.status == GameStatus.playing,
+                      Spacer(flex: isShortScreen ? 1 : 1),
+                      const CircularTimer(),
+                      Spacer(flex: isShortScreen ? 1 : 2),
+                      SizedBox(
+                        height: isVeryShortScreen ? 70 : 100,
+                        child: const Center(child: NounDisplay()),
                       ),
-                      ArticleButton(
-                        article: 'das',
-                        onTap: () => gameNotifier.selectArticle('das'),
-                        isEnabled: gameState.status == GameStatus.playing,
+                      Spacer(flex: isShortScreen ? 1 : 2),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ArticleButton(
+                            article: 'der',
+                            onTap: () => gameNotifier.selectArticle('der'),
+                            isEnabled: gameState.status == GameStatus.playing,
+                          ),
+                          ArticleButton(
+                            article: 'die',
+                            onTap: () => gameNotifier.selectArticle('die'),
+                            isEnabled: gameState.status == GameStatus.playing,
+                          ),
+                          ArticleButton(
+                            article: 'das',
+                            onTap: () => gameNotifier.selectArticle('das'),
+                            isEnabled: gameState.status == GameStatus.playing,
+                          ),
+                        ],
                       ),
+                      if (!isShortScreen) const Spacer(flex: 1),
+                      if (isShortScreen) const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [const FullscreenButton(), _MuteButton()],
+                      ),
+                      if (!isShortScreen)
+                        const SizedBox(height: LayoutConstants.spaceSm),
                     ],
                   ),
-                  const Spacer(flex: 1),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [const FullscreenButton(), _MuteButton()],
-                  ),
-                  const SizedBox(height: LayoutConstants.spaceSm),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ),

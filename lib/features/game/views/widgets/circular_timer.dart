@@ -195,7 +195,9 @@ class _CircularTimerState extends ConsumerState<CircularTimer>
               ),
 
               Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height < 600 ? 12.0 : 20.0,
+                ),
                 child: SizedBox(
                   height: 20,
                   child:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/game_provider.dart';
 import '../models/game_state.dart';
@@ -71,6 +72,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     return Scaffold(
       body: SafeArea(
         top: false,
+        bottom: !kIsWeb,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(

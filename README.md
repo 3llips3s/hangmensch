@@ -1,6 +1,6 @@
 # Hangmensch
 
-A professional German article learning game based on hangman mechanics. Designed to help learners master "der", "die", and "das" through engaging gameplay.
+A German article learning game based on hangman mechanics. Designed to help learners master "der", "die", and "das" through engaging gameplay.
 
 ## About the Project
 Hangmensch (a play on "Hangman" and the German word for "human") is a gamified learning tool. Players guess German nouns and their corresponding articles. Incorrect guesses progressively build a hangman, while correct guesses reveal the word.

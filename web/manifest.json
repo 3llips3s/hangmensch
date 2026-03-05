@@ -3,9 +3,9 @@
     "short_name": "Hangmensch",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFFFFF",
-    "theme_color": "#FFFFFF",
-    "description": "A professional German article learning game based on hangman mechanics",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "description": "A German article learning game based on hangman mechanics",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

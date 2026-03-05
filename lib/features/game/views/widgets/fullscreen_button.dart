@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:hangmensch/core/utils/web_fullscreen.dart' as web_utils;
 
-/// A button that toggles the application's fullscreen mode, primarily for web.
+/// A button that toggles the application's fullscreen mode, hidden if unsupported.
 class FullscreenButton extends StatelessWidget {
   const FullscreenButton({super.key});
 
@@ -14,7 +14,9 @@ class FullscreenButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb) return const SizedBox.shrink();
+    if (!kIsWeb || !web_utils.isFullscreenSupported) {
+      return const SizedBox.shrink();
+    }
 
     return IconButton(
       icon: const Icon(Icons.fullscreen),

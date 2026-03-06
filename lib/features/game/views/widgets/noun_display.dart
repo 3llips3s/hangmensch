@@ -98,16 +98,21 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
           _countdownController.forward(from: 0.0);
         });
       }
+      // Reduce font size on compact viewports to stay within the allocated SizedBox height.
+      final countdownFontSize = widget.isCompact ? 56.0 : 80.0;
       return Center(
-        child: ScaleTransition(
-          scale: _countdownAnimation,
-          child: Text(
-            '$_countdownValue',
-            key: ValueKey(_countdownValue),
-            style: const TextStyle(
-              fontSize: 80,
-              fontWeight: FontWeight.bold,
-              color: UIColors.gold,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: ScaleTransition(
+            scale: _countdownAnimation,
+            child: Text(
+              '$_countdownValue',
+              key: ValueKey(_countdownValue),
+              style: TextStyle(
+                fontSize: countdownFontSize,
+                fontWeight: FontWeight.bold,
+                color: UIColors.gold,
+              ),
             ),
           ),
         ),

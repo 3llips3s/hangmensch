@@ -13,6 +13,8 @@ import 'widgets/gallows_view.dart';
 import 'widgets/game_over_dialog.dart';
 import '../providers/high_score_provider.dart';
 import '../../../core/constants/layout_constants.dart';
+import '../../../core/constants/ui_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/web_fullscreen.dart' as web_utils;
 
 /// Represents the primary game screen where the core gameplay loop occurs.
@@ -44,7 +46,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
   /// Handles the completion of the death animation by triggering the game over dialog.
   void _onDeathAnimationComplete() async {
-    /// Wait for the audio and visual cues to conclude before showing the dialog.
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       _showDialog();
@@ -56,11 +57,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final gameNotifier = ref.read(gameProvider.notifier);
     final gameState = ref.watch(gameProvider);
 
-    /// Listens for game state transitions to trigger sound effects.
     ref.listen(gameProvider, (previous, next) {
       if (previous == null) return;
       final soundController = ref.read(soundControllerProvider.notifier);
-
       if (next.score > previous.score) {
         soundController.playCorrect();
       }
@@ -70,10 +69,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       _dialogShown = false;
     }
 
-    // isCompact is true when running on web and NOT in fullscreen mode.
-    // On native platforms kIsWeb is false, so isCompact is always false there.
-    // When the user enters fullscreen, the canvas resize triggers a rebuild,
-    // which re-evaluates isFullscreenActive and clears the compact flag.
+    // True only when running on web AND not in fullscreen mode.
+    // Native apps always use false — no layout changes there.
     final isCompact = kIsWeb && !web_utils.isFullscreenActive;
 
     return Scaffold(
@@ -101,7 +98,23 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     ),
                   ),
                   const Spacer(flex: 1),
-                  CircularTimer(isCompact: isCompact),
+                  const CircularTimer(),
+                  // Zero-height overlay: label renders into the Spacer below without
+                  // taking any layout space, so NounDisplay remains perfectly centered
+                  // between the equal Spacer(2) above and below it. Safe on all platforms
+                  // because the label (≤22px) always fits within Spacer(2).
+                  SizedBox(
+                    height: 0,
+                    child: OverflowBox(
+                      alignment: Alignment.topCenter,
+                      maxHeight: 22,
+                      maxWidth: 200,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: const _DifficultyLabel(),
+                      ),
+                    ),
+                  ),
                   const Spacer(flex: 2),
                   SizedBox(
                     height: isCompact ? 80 : 100,
@@ -140,6 +153,89 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A label that fades in/out to display the current difficulty name.
+///
+/// Manages its own animation lifecycle and responds to [gameProvider] state changes.
+/// Rendered as a zero-layout-height overlay in [GameScreen] so it never displaces
+/// surrounding widgets.
+class _DifficultyLabel extends ConsumerStatefulWidget {
+  const _DifficultyLabel();
+
+  @override
+  ConsumerState<_DifficultyLabel> createState() => _DifficultyLabelState();
+}
+
+class _DifficultyLabelState extends ConsumerState<_DifficultyLabel>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  String? _label;
+
+  static const _labels = {
+    'easy': 'chill',
+    'medium': 'zügig',
+    'hard': 'hektik',
+    'infinite': 'blitz',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Triggers the fade animation for the given [difficultyName].
+  void _trigger(String difficultyName) {
+    setState(() => _label = _labels[difficultyName] ?? difficultyName);
+    _controller.forward(from: 0.0).then((_) {
+      if (mounted) setState(() => _label = null);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final numberStyle = Theme.of(context).numberStyle;
+
+    ref.listen(gameProvider.select((s) => s.difficulty), (previous, next) {
+      if (previous != null && next != previous) _trigger(next.name);
+    });
+
+    ref.listen(gameProvider.select((s) => s.status), (previous, next) {
+      if (next.name == 'playing' &&
+          (previous?.name == 'idle' || previous?.name == 'countdown')) {
+        _trigger(ref.read(gameProvider).difficulty.name);
+      }
+    });
+
+    if (_label == null) return const SizedBox.shrink();
+
+    return FadeTransition(
+      opacity: TweenSequence<double>([
+        TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 25),
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.0), weight: 50),
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 25),
+      ]).animate(_controller),
+      child: Text(
+        _label!,
+        textAlign: TextAlign.center,
+        style: numberStyle.copyWith(
+          fontSize: 11,
+          color: UIColors.gold,
+          letterSpacing: 1.2,
         ),
       ),
     );

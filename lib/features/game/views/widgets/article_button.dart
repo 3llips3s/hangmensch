@@ -128,10 +128,10 @@ class _ArticleButtonState extends ConsumerState<ArticleButton>
           if (isRevealed) {
             if (isCorrectArticle) {
               borderColor = UIColors.gold;
-              fillColor = UIColors.gold.withOpacity(0.2);
+              fillColor = UIColors.gold.withValues(alpha: 0.2);
             } else if (isWrongSelection) {
               borderColor = UIColors.wrong;
-              fillColor = UIColors.wrong.withOpacity(0.2);
+              fillColor = UIColors.wrong.withValues(alpha: 0.2);
             }
           }
 

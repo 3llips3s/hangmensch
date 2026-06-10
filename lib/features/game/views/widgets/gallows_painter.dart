@@ -33,7 +33,7 @@ class GallowsPainter extends CustomPainter {
           ..strokeCap = StrokeCap.round;
 
     if (baseOpacity > 0) {
-      paint.color = UIColors.gold.withOpacity(baseOpacity);
+      paint.color = UIColors.gold.withValues(alpha: baseOpacity);
       canvas.drawLine(
         GallowsDrawingSpecs.baseStart,
         GallowsDrawingSpecs.baseEnd,
@@ -42,7 +42,7 @@ class GallowsPainter extends CustomPainter {
     }
 
     if (poleOpacity > 0) {
-      paint.color = UIColors.gold.withOpacity(poleOpacity);
+      paint.color = UIColors.gold.withValues(alpha: poleOpacity);
       canvas.drawLine(
         GallowsDrawingSpecs.poleStart,
         GallowsDrawingSpecs.poleEnd,
@@ -51,7 +51,7 @@ class GallowsPainter extends CustomPainter {
     }
 
     if (barOpacity > 0) {
-      paint.color = UIColors.gold.withOpacity(barOpacity);
+      paint.color = UIColors.gold.withValues(alpha: barOpacity);
       canvas.drawLine(
         GallowsDrawingSpecs.barStart,
         GallowsDrawingSpecs.barEnd,
@@ -62,7 +62,7 @@ class GallowsPainter extends CustomPainter {
     if (ropeOpacity > 0) {
       final ropePaint =
           Paint()
-            ..color = UIColors.gold.withOpacity(ropeOpacity)
+            ..color = UIColors.gold.withValues(alpha: ropeOpacity)
             ..strokeWidth = GallowsDrawingSpecs.ropeStrokeWidth
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round;

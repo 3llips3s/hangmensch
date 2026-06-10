@@ -24,7 +24,7 @@ class HangmenschPainter extends CustomPainter {
           ..strokeCap = StrokeCap.round;
 
     if (partOpacities[0] > 0) {
-      paint.color = UIColors.red.withOpacity(partOpacities[0]);
+      paint.color = UIColors.red.withValues(alpha: partOpacities[0]);
       canvas.drawCircle(
         GallowsDrawingSpecs.headCenter + partOffsets[0],
         GallowsDrawingSpecs.headRadius,
@@ -33,7 +33,7 @@ class HangmenschPainter extends CustomPainter {
     }
 
     if (partOpacities[1] > 0) {
-      paint.color = UIColors.red.withOpacity(partOpacities[1]);
+      paint.color = UIColors.red.withValues(alpha: partOpacities[1]);
       canvas.drawLine(
         GallowsDrawingSpecs.leftArmStart + partOffsets[1],
         GallowsDrawingSpecs.leftArmEnd + partOffsets[1],
@@ -42,7 +42,7 @@ class HangmenschPainter extends CustomPainter {
     }
 
     if (partOpacities[2] > 0) {
-      paint.color = UIColors.red.withOpacity(partOpacities[2]);
+      paint.color = UIColors.red.withValues(alpha: partOpacities[2]);
       canvas.drawLine(
         GallowsDrawingSpecs.rightArmStart + partOffsets[2],
         GallowsDrawingSpecs.rightArmEnd + partOffsets[2],
@@ -51,7 +51,7 @@ class HangmenschPainter extends CustomPainter {
     }
 
     if (partOpacities[3] > 0) {
-      paint.color = UIColors.red.withOpacity(partOpacities[3]);
+      paint.color = UIColors.red.withValues(alpha: partOpacities[3]);
       canvas.drawLine(
         GallowsDrawingSpecs.leftLegStart + partOffsets[3],
         GallowsDrawingSpecs.leftLegEnd + partOffsets[3],
@@ -61,7 +61,7 @@ class HangmenschPainter extends CustomPainter {
 
     /// Renders the skirt component as a triangular path.
     if (partOpacities[4] > 0) {
-      paint.color = UIColors.red.withOpacity(partOpacities[4]);
+      paint.color = UIColors.red.withValues(alpha: partOpacities[4]);
       final offset = partOffsets[4];
       final path =
           Path()
@@ -81,7 +81,7 @@ class HangmenschPainter extends CustomPainter {
     }
 
     if (partOpacities[5] > 0) {
-      paint.color = UIColors.red.withOpacity(partOpacities[5]);
+      paint.color = UIColors.red.withValues(alpha: partOpacities[5]);
       canvas.drawLine(
         GallowsDrawingSpecs.rightLegStart + partOffsets[5],
         GallowsDrawingSpecs.rightLegEnd + partOffsets[5],
@@ -93,7 +93,7 @@ class HangmenschPainter extends CustomPainter {
     if (partOpacities[6] > 0) {
       final eyePaint =
           Paint()
-            ..color = UIColors.red.withOpacity(partOpacities[6])
+            ..color = UIColors.red.withValues(alpha: partOpacities[6])
             ..strokeWidth = 2.0
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round;

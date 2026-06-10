@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/game_provider.dart';
 import '../models/game_state.dart';
@@ -11,6 +13,7 @@ import 'widgets/noun_display.dart';
 import 'widgets/fullscreen_button.dart';
 import 'widgets/gallows_view.dart';
 import 'widgets/game_over_dialog.dart';
+import 'widgets/desktop_hint_snackbar.dart';
 import '../providers/high_score_provider.dart';
 import '../../../core/constants/layout_constants.dart';
 import '../../../core/constants/ui_colors.dart';
@@ -25,8 +28,60 @@ class GameScreen extends ConsumerStatefulWidget {
   ConsumerState<GameScreen> createState() => _GameScreenState();
 }
 
+bool _hasShownDesktopHint = false;
+
 class _GameScreenState extends ConsumerState<GameScreen> {
   bool _dialogShown = false;
+  bool _showDesktopHint = false;
+  bool _isDesktopPlatform = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isDesktopPlatform =
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
+
+    if (!_hasShownDesktopHint) {
+      if (_isDesktopPlatform) {
+        _hasShownDesktopHint = true;
+        _showDesktopHint = true;
+      }
+    }
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      final gameNotifier = ref.read(gameProvider.notifier);
+      final gameState = ref.read(gameProvider);
+
+      if (key == LogicalKeyboardKey.space) {
+        if (gameState.status == GameStatus.idle) {
+          gameNotifier.startGame();
+          return KeyEventResult.handled;
+        } else if (gameState.status == GameStatus.gameOver) {
+          gameNotifier.restartGame();
+          return KeyEventResult.handled;
+        }
+      }
+
+      if (gameState.status == GameStatus.playing) {
+        if (key == LogicalKeyboardKey.keyR) {
+          gameNotifier.selectArticle('der');
+          return KeyEventResult.handled;
+        } else if (key == LogicalKeyboardKey.keyE) {
+          gameNotifier.selectArticle('die');
+          return KeyEventResult.handled;
+        } else if (key == LogicalKeyboardKey.keyS) {
+          gameNotifier.selectArticle('das');
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
 
   /// Displays the game over dialog with final [score] and [highScore].
   void _showDialog() {
@@ -73,83 +128,107 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     // Native apps always use false — no layout changes there.
     final isCompact = kIsWeb && !web_utils.isFullscreenActive;
 
-    return Scaffold(
-      body: SafeArea(
-        top: false,
-        bottom: !kIsWeb,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: LayoutConstants.maxWidth,
-            ),
-            child: Padding(
-              padding: LayoutConstants.screenPadding(context).copyWith(
-                top: 8,
-                bottom: isCompact ? 8 : LayoutConstants.verticalPadding,
+    return Focus(
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
+      child: Scaffold(
+        body: SafeArea(
+          top: false,
+          bottom: !kIsWeb,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: LayoutConstants.maxWidth,
               ),
-              child: Column(
-                children: [
-                  const TopBar(),
-                  const Spacer(flex: 3),
-                  Center(
-                    child: GallowsView(
-                      gameState: gameState,
-                      onDeathAnimationComplete: _onDeathAnimationComplete,
-                    ),
-                  ),
-                  const Spacer(flex: 1),
-                  const CircularTimer(),
-                  // Zero-height overlay: label renders into the Spacer below without
-                  // taking any layout space, so NounDisplay remains perfectly centered
-                  // between the equal Spacer(2) above and below it. Safe on all platforms
-                  // because the label (≤22px) always fits within Spacer(2).
-                  SizedBox(
-                    height: 0,
-                    child: OverflowBox(
-                      alignment: Alignment.topCenter,
-                      maxHeight: 22,
-                      maxWidth: 200,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: const _DifficultyLabel(),
+              child: Padding(
+                padding: LayoutConstants.screenPadding(context).copyWith(
+                  top: 8,
+                  bottom: isCompact ? 8 : LayoutConstants.verticalPadding,
+                ),
+                child: Column(
+                  children: [
+                    const TopBar(),
+                    const Spacer(flex: 3),
+                    Center(
+                      child: GallowsView(
+                        gameState: gameState,
+                        onDeathAnimationComplete: _onDeathAnimationComplete,
                       ),
                     ),
-                  ),
-                  const Spacer(flex: 2),
-                  SizedBox(
-                    height: isCompact ? 80 : 100,
-                    child: Center(child: NounDisplay(isCompact: isCompact)),
-                  ),
-                  const Spacer(flex: 2),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ArticleButton(
-                        article: 'der',
-                        onTap: () => gameNotifier.selectArticle('der'),
-                        isEnabled: gameState.status == GameStatus.playing,
+                    const Spacer(flex: 1),
+                    const CircularTimer(),
+                    // Zero-height overlay: label renders into the Spacer below without
+                    // taking any layout space, so NounDisplay remains perfectly centered
+                    // between the equal Spacer(2) above and below it. Safe on all platforms
+                    // because the label (≤22px) always fits within Spacer(2).
+                    SizedBox(
+                      height: 0,
+                      child: OverflowBox(
+                        alignment: Alignment.topCenter,
+                        maxHeight: 22,
+                        maxWidth: 200,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: const _DifficultyLabel(),
+                        ),
                       ),
-                      ArticleButton(
-                        article: 'die',
-                        onTap: () => gameNotifier.selectArticle('die'),
-                        isEnabled: gameState.status == GameStatus.playing,
+                    ),
+                    const Spacer(flex: 2),
+                    SizedBox(
+                      height: isCompact ? 80 : 100,
+                      child: Center(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            NounDisplay(
+                              isCompact: isCompact,
+                              hideStartPrompt: _showDesktopHint,
+                              isDesktop: _isDesktopPlatform,
+                            ),
+                            if (_showDesktopHint)
+                              DesktopHintSnackbar(
+                                onComplete: () {
+                                  if (mounted) {
+                                    setState(() => _showDesktopHint = false);
+                                  }
+                                },
+                              ),
+                          ],
+                        ),
                       ),
-                      ArticleButton(
-                        article: 'das',
-                        onTap: () => gameNotifier.selectArticle('das'),
-                        isEnabled: gameState.status == GameStatus.playing,
-                      ),
-                    ],
-                  ),
-                  if (isCompact) const SizedBox(height: 20),
-                  if (!isCompact) const Spacer(flex: 1),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [const FullscreenButton(), _MuteButton()],
-                  ),
-                  if (!isCompact)
-                    const SizedBox(height: LayoutConstants.spaceSm),
-                ],
+                    ),
+                    const Spacer(flex: 2),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ArticleButton(
+                          article: 'der',
+                          onTap: () => gameNotifier.selectArticle('der'),
+                          isEnabled: gameState.status == GameStatus.playing,
+                        ),
+                        ArticleButton(
+                          article: 'die',
+                          onTap: () => gameNotifier.selectArticle('die'),
+                          isEnabled: gameState.status == GameStatus.playing,
+                        ),
+                        ArticleButton(
+                          article: 'das',
+                          onTap: () => gameNotifier.selectArticle('das'),
+                          isEnabled: gameState.status == GameStatus.playing,
+                        ),
+                      ],
+                    ),
+                    if (isCompact) const SizedBox(height: 20),
+                    if (!isCompact) const Spacer(flex: 1),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [const FullscreenButton(), _MuteButton()],
+                    ),
+                    if (!isCompact)
+                      const SizedBox(height: LayoutConstants.spaceSm),
+                  ],
+                ),
               ),
             ),
           ),

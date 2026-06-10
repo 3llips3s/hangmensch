@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/game_provider.dart';
 import '../../../../core/constants/ui_colors.dart';
@@ -69,9 +70,19 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
     final numberStyle = Theme.of(context).numberStyle;
     const darkContent = Color(0xFF1A1A1A);
 
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-      child: Center(
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.space) {
+          Navigator.of(context).pop();
+          ref.read(gameProvider.notifier).restartGame();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+        child: Center(
         child: SlideTransition(
           position: _slideAnimation,
           child: FadeTransition(
@@ -89,7 +100,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),
@@ -128,7 +139,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
                       children: [
                         Icon(
                           UIElements.highScoreIcon,
-                          color: darkContent.withOpacity(0.6),
+                          color: darkContent.withValues(alpha: 0.6),
                           size: 18,
                         ),
                         const SizedBox(width: 6),
@@ -136,7 +147,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
                           '${widget.highScore}',
                           style: numberStyle.copyWith(
                             fontSize: 20,
-                            color: darkContent.withOpacity(0.6),
+                            color: darkContent.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -157,6 +168,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog>
                 ),
               ),
             ),
+          ),
           ),
         ),
       ),

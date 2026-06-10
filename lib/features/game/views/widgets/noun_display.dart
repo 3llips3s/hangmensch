@@ -9,8 +9,15 @@ import '../../../../core/constants/ui_elements.dart';
 class NounDisplay extends ConsumerStatefulWidget {
   /// Whether the surrounding layout is compact (e.g. non-fullscreen mobile browser).
   final bool isCompact;
+  final bool hideStartPrompt;
+  final bool isDesktop;
 
-  const NounDisplay({super.key, this.isCompact = false});
+  const NounDisplay({
+    super.key,
+    this.isCompact = false,
+    this.hideStartPrompt = false,
+    this.isDesktop = false,
+  });
 
   @override
   ConsumerState<NounDisplay> createState() => _NounDisplayState();
@@ -21,6 +28,10 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
   /// Controller for the countdown scale transition.
   late AnimationController _countdownController;
   late Animation<double> _countdownAnimation;
+
+  /// Controller for the pulse animation.
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
 
   /// The current value shown during the initiation countdown.
   int _countdownValue = 3;
@@ -42,6 +53,15 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
       CurvedAnimation(parent: _countdownController, curve: Curves.easeInOut),
     );
 
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOutSine),
+    );
+
     _countdownController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         if (_countdownValue > 1) {
@@ -61,6 +81,7 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
 
   @override
   void dispose() {
+    _pulseController.dispose();
     _countdownController.dispose();
     super.dispose();
   }
@@ -72,20 +93,65 @@ class _NounDisplayState extends ConsumerState<NounDisplay>
     if (gameState.status == GameStatus.idle) {
       _countdownValue = 3;
       _isCountingDown = false;
+
       return GestureDetector(
         onTap: () => ref.read(gameProvider.notifier).startGame(),
-        child: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              UIElements.tapToStart,
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: UIColors.white,
+        child: AnimatedOpacity(
+          opacity: widget.hideStartPrompt ? 0.0 : 1.0,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ScaleTransition(
+                scale: _pulseAnimation,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.isDesktop)
+                      Container(
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: UIColors.darkGrey,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: UIColors.gold.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              offset: const Offset(0, 2),
+                              blurRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: const Text(
+                          'SPACE',
+                          style: TextStyle(
+                            color: UIColors.gold,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    Text(
+                      widget.isDesktop ? '-> Los!' : UIElements.tapToStart,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: UIColors.white,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
